@@ -1,137 +1,88 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import {
+  Search,
+  Bell,
+  ChevronDown,
+  LayoutGrid,
+  BarChart2,
+  TrendingUp,
+  Calendar,
+  Settings,
+  FileText,
+  Bot,
+  Shield,
+  Sun,
+  Moon,
+  ArrowUp,
+  ArrowDown,
+  Users,
+  MessageSquareText,
+  MessageCircleMore,
+  MoreHorizontal,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react';
 
-const menuItems = [
-  {
-    title: 'MENU',
-    items: [
-      {
-        icon: '/home.png',
-        label: 'Home',
-        href: '/',
-        visible: ['admin', 'teacher', 'student', 'parent'],
-      },
-      {
-        icon: '/teacher.png',
-        label: 'Teachers',
-        href: '/list/teachers',
-        visible: ['admin', 'teacher'],
-      },
-      {
-        icon: '/student.png',
-        label: 'Students',
-        href: '/list/students',
-        visible: ['admin', 'teacher'],
-      },
-      {
-        icon: '/parent.png',
-        label: 'Parents',
-        href: '/list/parents',
-        visible: ['admin', 'teacher'],
-      },
-      {
-        icon: '/subject.png',
-        label: 'Subjects',
-        href: '/list/subjects',
-        visible: ['admin'],
-      },
-      {
-        icon: '/class.png',
-        label: 'Classes',
-        href: '/list/classes',
-        visible: ['admin', 'teacher'],
-      },
-      {
-        icon: '/lesson.png',
-        label: 'Lessons',
-        href: '/list/lessons',
-        visible: ['admin', 'teacher'],
-      },
-      {
-        icon: '/exam.png',
-        label: 'Exams',
-        href: '/list/exams',
-        visible: ['admin', 'teacher', 'student', 'parent'],
-      },
-      {
-        icon: '/assignment.png',
-        label: 'Assignments',
-        href: '/list/assignments',
-        visible: ['admin', 'teacher', 'student', 'parent'],
-      },
-      {
-        icon: '/result.png',
-        label: 'Results',
-        href: '/list/results',
-        visible: ['admin', 'teacher', 'student', 'parent'],
-      },
-      {
-        icon: '/attendance.png',
-        label: 'Attendance',
-        href: '/list/attendance',
-        visible: ['admin', 'teacher', 'student', 'parent'],
-      },
-      {
-        icon: '/calendar.png',
-        label: 'Events',
-        href: '/list/events',
-        visible: ['admin', 'teacher', 'student', 'parent'],
-      },
-      {
-        icon: '/message.png',
-        label: 'Messages',
-        href: '/list/messages',
-        visible: ['admin', 'teacher', 'student', 'parent'],
-      },
-      {
-        icon: '/announcement.png',
-        label: 'Announcements',
-        href: '/list/announcements',
-        visible: ['admin', 'teacher', 'student', 'parent'],
-      },
-    ],
-  },
-  {
-    title: 'OTHER',
-    items: [
-      {
-        icon: '/profile.png',
-        label: 'Profile',
-        href: '/profile',
-        visible: ['admin', 'teacher', 'student', 'parent'],
-      },
-      {
-        icon: '/setting.png',
-        label: 'Settings',
-        href: '/settings',
-        visible: ['admin', 'teacher', 'student', 'parent'],
-      },
-      {
-        icon: '/logout.png',
-        label: 'Logout',
-        href: '/logout',
-        visible: ['admin', 'teacher', 'student', 'parent'],
-      },
-    ],
-  },
+const navItems = [
+  { name: 'Overview', icon: LayoutGrid, active: true },
+  { name: 'Keyword Tracker', icon: BarChart2 },
+  { name: 'Sentiment Trends', icon: TrendingUp },
+  { name: 'Data Collection Schedule', icon: Calendar },
+  { name: 'API Settings', icon: Shield },
+  { name: 'Analytic', icon: FileText },
+  { name: 'Settings', icon: Settings },
 ];
 
 const Menu = () => {
   return (
-    <div className="mt-4 text-sm">
-      {menuItems.map((i) => (
-        <div className="flex flex-col gap-2" key={i.title}>
-          <span className="hidden lg:block text-gray-400 font-light my-4">
-            {i.title}
-          </span>
-          {i.items.map((item) => (
-            <Link href={item.href} key={item.label}>
-              <Image src={item.icon} alt="" width={20} height={20} />
-              <span>{item.label}</span>
-            </Link>
-          ))}
+    <div className="bg-white border-r border-gray-200 flex flex-col w-60 z-20 transform transition-transform duration-300 ease-in-out">
+      <div className="px-4 py-3 flex items-center">
+        <img
+          src="https://placehold.co/40x40/9333EA/FFFFFF?text=M"
+          alt="User Logo"
+          className="rounded-lg"
+        />
+        <div className="ml-3">
+          <h1 className="font-bold text-sm">My Workspace</h1>
+          <p className="text-xs text-gray-500">MU sentiment Dashboard</p>
         </div>
-      ))}
+      </div>
+      <div className="px-4 pb-4">
+        <h2 className="text-xs text-gray-500 font-semibold uppercase mb-2">
+          MAIN MENU
+        </h2>
+        <ul className="space-y-1">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <li key={item.name}>
+                <a
+                  href="#"
+                  className={`flex items-center p-2 rounded-lg text-sm font-medium ${
+                    item.active
+                      ? 'bg-purple-100 text-purple-700'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  <Icon className="w-5 h-5 mr-3" />
+                  {item.name}
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+      <div className="mt-auto p-4 border-t border-gray-200">
+        <div className="p-4 bg-gray-100 rounded-lg text-center">
+          <Bot className="mx-auto w-8 h-8 text-purple-600 mb-2" />
+          <h3 className="font-bold text-sm">Need help?</h3>
+          <p className="text-xs text-gray-500 mb-3">Please check our docs</p>
+          <button className="bg-purple-600 text-white text-sm w-full py-2 rounded-lg">
+            DOCUMENTATION
+          </button>
+        </div>
+      </div>
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import React from 'react';
+import { Menu, icons } from 'lucide-react';
 
 const Navbar = () => {
   return (

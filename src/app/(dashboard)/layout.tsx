@@ -1,3 +1,5 @@
+'use client';
+import { useState } from 'react';
 import Menu from '@/components/Menu';
 import Navbar from '@/components/Navbar';
 import Image from 'next/image';
@@ -8,19 +10,26 @@ export default function DashboardLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // Function to toggle the menu state
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
   return (
     <html lang="en">
       <div className="h-screen flex">
-        <div className="w-1/6 md:w[8%] lg:w-[16%] xl:w-[14%]">
-          <Link href="/">
-            <Image src="/logo.png" alt="logo" width={32} height={32} />
-            <span className="hidden lg:block">School Lama</span>
-          </Link>
+        <div className="flex-shrink-0 transform transition-transform duration-300 ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}">
+          <div className="flex justify-center border-b border-r border-gray-200">
+            <Link href="/">
+              <Image src="/muiclogo.png" alt="logo" width={180} height={120} />
+            </Link>
+          </div>
           <Menu />
         </div>
-        <div className="w-5/6 md:w[92%] lg:w-[84%] xl:w-[86%] bg-[#F7F8FA] overflow-scroll">
+        <div className="flex-grow bg-[#F7F8FA] overflow-y-auto">
           <Navbar />
-          {children}
+          <div className="p-6">{children}</div>
         </div>
       </div>
     </html>
