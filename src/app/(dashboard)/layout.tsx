@@ -27,16 +27,18 @@ export default function DashboardLayout({
             ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}
           `}
         >
-          <div className="flex justify-center border-b border-gray-200">
+          <div className="flex justify-center border-b border-gray-200 h-14">
             <Link href="/">
               <Image src="/muiclogo.png" alt="logo" width={180} height={120} />
             </Link>
           </div>
           <Menu />
         </div>
-        <div className="flex-grow bg-[#F7F8FA] overflow-y-auto">
-          <Navbar onMenuToggle={toggleMenu} />
-          <div className="p-6">{children}</div>
+        <div className="flex-grow overflow-y-auto">
+          <div className="border-b border-gray-200 h-14">
+            <Navbar onMenuToggle={toggleMenu} />
+          </div>
+          <div className="p-6 bg-[#F7F8FA]">{children}</div>
         </div>
       </div>
     </html>
