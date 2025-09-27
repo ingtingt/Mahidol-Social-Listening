@@ -19,8 +19,15 @@ export default function DashboardLayout({
   return (
     <html lang="en">
       <div className="h-screen flex">
-        <div className="flex-shrink-0 transform transition-transform duration-300 ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}">
-          <div className="flex justify-center border-b border-r border-gray-200">
+        <div
+          className={`
+            bg-white border-r border-gray-200 flex flex-col h-full z-20
+            transform transition-transform duration-300 ease-in-out
+            fixed w-60 lg:relative lg:translate-x-0
+            ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}
+          `}
+        >
+          <div className="flex justify-center border-b border-gray-200">
             <Link href="/">
               <Image src="/muiclogo.png" alt="logo" width={180} height={120} />
             </Link>
@@ -28,7 +35,7 @@ export default function DashboardLayout({
           <Menu />
         </div>
         <div className="flex-grow bg-[#F7F8FA] overflow-y-auto">
-          <Navbar />
+          <Navbar onMenuToggle={toggleMenu} />
           <div className="p-6">{children}</div>
         </div>
       </div>

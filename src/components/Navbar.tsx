@@ -2,9 +2,12 @@ import Image from 'next/image';
 import React from 'react';
 import { Menu, icons } from 'lucide-react';
 
-const Navbar = () => {
+type NavbarProps = {
+  onMenuToggle: () => void;
+};
+const Navbar = ({ onMenuToggle }: NavbarProps) => {
   return (
-    <div className="flex item-center justify-between p-4">
+    <div className="flex items-center justify-between p-4">
       {/*Search bar */}
       <div className="hidden md:flex items-center gap-2 text-xs rounded-full ring-[1.5px] ring-gray-300 px-2">
         <Image src="/search.png" alt="" width={14} height={14} />
@@ -36,6 +39,9 @@ const Navbar = () => {
           height={36}
           className="rounded-full"
         />
+        <button onClick={onMenuToggle} className="text-gray-600 lg:hidden">
+          <Menu className="w-6 h-6" />
+        </button>
       </div>
     </div>
   );

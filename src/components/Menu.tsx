@@ -36,7 +36,7 @@ const navItems = [
 
 const Menu = () => {
   return (
-    <div className="bg-white border-r border-gray-200 flex flex-col w-60 z-20 transform transition-transform duration-300 ease-in-out">
+    <div className="flex flex-col w-60 z-20 transform transition-transform duration-300 ease-in-out">
       <div className="px-4 py-3 flex items-center">
         <img
           src="https://placehold.co/40x40/9333EA/FFFFFF?text=M"
