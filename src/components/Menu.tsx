@@ -77,10 +77,14 @@ const Menu = () => {
         <div className="p-4 bg-gray-100 rounded-lg text-center">
           <Bot className="mx-auto w-8 h-8 text-purple-600 mb-2" />
           <h3 className="font-bold text-sm">Need help?</h3>
-          <p className="text-xs text-gray-500 mb-3">Please check our docs</p>
-          <button className="bg-purple-600 text-white text-sm w-full py-2 rounded-lg">
-            DOCUMENTATION
-          </button>
+          <p className="text-xs text-gray-500 mb-3">
+            Please check our assistant
+          </p>
+          <Link href="https://newmy.muic.io/chatmessage">
+            <button className="bg-purple-600 text-white text-sm w-full py-2 rounded-lg">
+              AI Copter
+            </button>
+          </Link>
         </div>
       </div>
     </div>

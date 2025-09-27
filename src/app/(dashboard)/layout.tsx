@@ -18,7 +18,14 @@ export default function DashboardLayout({
   };
   return (
     <html lang="en">
-      <div className="h-screen flex">
+      <div className="h-screen flex relative overflow-hidden">
+        <div
+          className="
+            absolute -top-5 right-40 w-[500px] h-[500px] 
+            bg-purple-300 rounded-full 
+            blur-3xl opacity-40 z-[-1]
+          "
+        ></div>
         <div
           className={`
             bg-white border-r border-gray-200 flex flex-col h-full z-20
@@ -28,17 +35,15 @@ export default function DashboardLayout({
           `}
         >
           <div className="flex justify-center border-b border-gray-200 h-14">
-            <Link href="/">
-              <Image src="/muiclogo.png" alt="logo" width={180} height={120} />
-            </Link>
+            <Image src="/muiclogo.png" alt="logo" width={180} height={120} />
           </div>
           <Menu />
         </div>
         <div className="flex-grow overflow-y-auto">
-          <div className="border-b border-gray-200 h-14">
+          <div className="border-b border-gray-200 h-14 bg-white">
             <Navbar onMenuToggle={toggleMenu} />
           </div>
-          <div className="p-6 bg-[#F7F8FA]">{children}</div>
+          <div className="p-6">{children}</div>
         </div>
       </div>
     </html>
