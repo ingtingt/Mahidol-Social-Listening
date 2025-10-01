@@ -191,3 +191,59 @@ export const topMessagesData: TopMessage[] = [
     PlatformIcon: Twitter,
   },
 ];
+
+//Keyword Tracker
+// New interface for a keyword
+export interface Keyword {
+  id: number;
+  name: string;
+  mentions: number;
+  positive: number;
+  neutral: number;
+  negative: number;
+  type?: string; // Optional type property
+}
+
+// Data for the keyword tracker
+export const initialKeywords: Keyword[] = [
+  {
+    id: 1,
+    name: 'Mahidol University',
+    mentions: 1204,
+    positive: 65,
+    neutral: 25,
+    negative: 10,
+  },
+  {
+    id: 2,
+    name: 'MUIC',
+    mentions: 987,
+    positive: 72,
+    neutral: 20,
+    negative: 8,
+  },
+  {
+    id: 3,
+    name: 'Salaya',
+    mentions: 452,
+    positive: 50,
+    neutral: 45,
+    negative: 5,
+  },
+  {
+    id: 4,
+    name: 'Admission',
+    mentions: 312,
+    positive: 40,
+    neutral: 50,
+    negative: 10,
+  },
+  {
+    id: 5,
+    name: 'Graduation',
+    mentions: 189,
+    positive: 85,
+    neutral: 15,
+    negative: 0,
+  },
+];

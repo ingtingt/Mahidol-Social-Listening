@@ -35,7 +35,9 @@ export default function DashboardLayout({
           `}
         >
           <div className="flex justify-center border-b border-gray-200 h-14">
-            <Image src="/muiclogo.png" alt="logo" width={180} height={120} />
+            <Link href="/">
+              <Image src="/muiclogo.png" alt="logo" width={180} height={120} />
+            </Link>
           </div>
           <Menu />
         </div>

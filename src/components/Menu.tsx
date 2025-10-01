@@ -1,4 +1,6 @@
+'use client';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
   Search,
@@ -25,16 +27,21 @@ import {
 } from 'lucide-react';
 
 const navItems = [
-  { name: 'Overview', icon: LayoutGrid, active: true },
-  { name: 'Keyword Tracker', icon: BarChart2 },
-  { name: 'Sentiment Trends', icon: TrendingUp },
-  { name: 'Data Collection Schedule', icon: Calendar },
-  { name: 'API Settings', icon: Shield },
-  { name: 'Analytic', icon: FileText },
-  { name: 'Settings', icon: Settings },
+  { name: 'Overview', icon: LayoutGrid, path: '/overview' },
+  { name: 'Keyword Tracker', icon: BarChart2, path: '/keyword-tracker' },
+  { name: 'Sentiment Trends', icon: TrendingUp, path: '/sentiment-trends' },
+  {
+    name: 'Data Collection Schedule',
+    icon: Calendar,
+    path: '/data-collection',
+  },
+  { name: 'API Settings', icon: Shield, path: '/api-settings' },
+  { name: 'Analytic', icon: FileText, path: '/analytic' },
+  { name: 'Settings', icon: Settings, path: '/settings' },
 ];
 
 const Menu = () => {
+  const pathname = usePathname();
   return (
     <div className="flex flex-col w-60 z-20 transform transition-transform duration-300 ease-in-out h-full">
       <div className="px-4 py-3 flex items-center">
@@ -54,13 +61,14 @@ const Menu = () => {
         </h2>
         <ul className="space-y-1">
           {navItems.map((item) => {
+            const isActive = pathname === item.path;
             const Icon = item.icon;
             return (
               <li key={item.name}>
                 <a
-                  href="#"
+                  href={item.path}
                   className={`flex items-center p-2 rounded-lg text-sm font-medium ${
-                    item.active
+                    isActive
                       ? 'bg-purple-100 text-purple-700'
                       : 'text-gray-600 hover:bg-gray-100'
                   }`}
