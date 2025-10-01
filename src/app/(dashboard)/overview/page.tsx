@@ -2,8 +2,19 @@ import AttendanceChart from '@/components/AttendanceChart';
 import CountChart from '@/components/CountChart';
 import UserCard from '@/components/UserCard';
 import StatCard from '@/components/StatCard';
-import { Users, BarChart, MessageSquare } from 'lucide-react';
+import {
+  Users,
+  BarChart,
+  MessageSquare,
+  Users2,
+  MessageSquareText,
+  MessageCircleMore,
+  BarChart2,
+} from 'lucide-react';
 import React from 'react';
+import SentimentCard from '@/components/SentimentCard';
+import { sentimentData, socialMediaCardData } from '@/data/mockData';
+import SocialMediaBreakdownCard from '@/components/SocialMediaBreakdownCard';
 
 const Overviewpage = () => {
   return (
@@ -19,41 +30,41 @@ const Overviewpage = () => {
           value="6,650"
           change={14}
           changeText="+ 210 today"
-          Icon={MessageSquare}
+          Icon={Users2}
         />
         <StatCard
-          title="Total Messages Collected"
+          title="Main Keyword Mentions"
           value="6,650"
           change={14}
           changeText="+ 210 today"
-          Icon={MessageSquare}
+          Icon={MessageSquareText}
         />
         <StatCard
-          title="Main Keyword Mentions"
+          title="Sub-Keyword Messages"
           value="5,514"
           change={20}
           changeText="+ 70 today"
-          Icon={BarChart}
+          Icon={MessageCircleMore}
         />
         <StatCard
-          title="Main Keyword Mentions"
+          title="Total Engagements"
           value="5,514"
           change={-10}
           changeText="- 60 today"
-          Icon={Users}
+          Icon={BarChart2}
         />
       </div>
 
-      {/* Middle chart section (placeholder) */}
+      {/* Sentiment Card) */}
       <div className="flex gap-4 flex-col lg:flex-row">
         {/* Sentiment chart will go here */}
         <div className="w-full lg:w-2/3 h-[450px] bg-white rounded-lg shadow-sm p-6">
-          <CountChart />
+          <SentimentCard data={sentimentData} />
         </div>
 
         {/* Social Media Breakdown will go here */}
         <div className="w-full lg:w-1/3 h-[450px] bg-white rounded-lg shadow-sm p-6">
-          <AttendanceChart />
+          <SocialMediaBreakdownCard data={socialMediaCardData} />
         </div>
       </div>
 
