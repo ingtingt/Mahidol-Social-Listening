@@ -13,8 +13,16 @@ import {
 } from 'lucide-react';
 import React from 'react';
 import SentimentCard from '@/components/SentimentCard';
-import { sentimentData, socialMediaCardData } from '@/data/mockData';
+import TopMessagesCard from '@/components/TopMessagesCard';
+import {
+  platformInsightsData,
+  sentimentData,
+  socialMediaCardData,
+  calendarDaysData,
+  topMessagesData,
+} from '@/data/mockData';
 import SocialMediaBreakdownCard from '@/components/SocialMediaBreakdownCard';
+import PlatformInsightsCard from '@/components/PlatformInsightsCard';
 
 const Overviewpage = () => {
   return (
@@ -56,15 +64,17 @@ const Overviewpage = () => {
       </div>
 
       {/* Sentiment Card) */}
-      <div className="flex gap-4 flex-col lg:flex-row">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
         {/* Sentiment chart will go here */}
-        <div className="w-full lg:w-2/3 h-[450px] bg-white rounded-lg shadow-sm p-6">
+        <div className="lg:col-span-2 flex flex-col gap-6">
           <SentimentCard data={sentimentData} />
+          <TopMessagesCard days={calendarDaysData} messages={topMessagesData} />
         </div>
 
         {/* Social Media Breakdown will go here */}
-        <div className="w-full lg:w-1/3 h-[450px] bg-white rounded-lg shadow-sm p-6">
+        <div className="lg:col-span-1 flex flex-col gap-6">
           <SocialMediaBreakdownCard data={socialMediaCardData} />
+          <PlatformInsightsCard insights={platformInsightsData} />
         </div>
       </div>
 
