@@ -247,3 +247,39 @@ export const initialKeywords: Keyword[] = [
     negative: 0,
   },
 ];
+
+//Sentiment Trend
+// New interface for sentiment trend data points
+export interface SentimentPoint {
+  date: string;
+  Positive: number;
+  Neutral: number;
+  Negative: number;
+}
+// Data for the line chart and table
+export const sentimentTrendsData: SentimentPoint[] = [
+  { date: '01 Sep', Positive: 400, Neutral: 240, Negative: 100 },
+  { date: '02 Sep', Positive: 300, Neutral: 139, Negative: 80 },
+  { date: '03 Sep', Positive: 200, Neutral: 980, Negative: 200 },
+  { date: '04 Sep', Positive: 278, Neutral: 390, Negative: 150 },
+  { date: '05 Sep', Positive: 189, Neutral: 480, Negative: 50 },
+  { date: '06 Sep', Positive: 239, Neutral: 380, Negative: 120 },
+  { date: '07 Sep', Positive: 349, Neutral: 430, Negative: 110 },
+  { date: '08 Sep', Positive: 400, Neutral: 240, Negative: 100 },
+  { date: '09 Sep', Positive: 300, Neutral: 139, Negative: 80 },
+  { date: '10 Sep', Positive: 200, Neutral: 980, Negative: 200 },
+  { date: '11 Sep', Positive: 278, Neutral: 390, Negative: 150 },
+  { date: '12 Sep', Positive: 189, Neutral: 480, Negative: 50 },
+  { date: '13 Sep', Positive: 239, Neutral: 380, Negative: 120 },
+  { date: '14 Sep', Positive: 349, Neutral: 430, Negative: 110 },
+];
+
+// Data for the filter buttons
+export const keywords = [
+  'All Keywords',
+  'Mahidol University',
+  'MUIC',
+  'Salaya',
+  'Admission',
+  'Graduation',
+];
