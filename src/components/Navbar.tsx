@@ -22,7 +22,11 @@ const Navbar = ({ onMenuToggle }: NavbarProps) => {
       {/*Icon and User*/}
       <div className="flex items-center gap-6 justify-end w-full">
         <div className="bg-white rounded-full flex items-center justify-center cursor-pointer">
-          <Link href="https://newmy.muic.io/dashboard">
+          <Link
+            href="https://newmy.muic.io/dashboard"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <Button variant="outline">MUIC Portal</Button>
           </Link>
         </div>

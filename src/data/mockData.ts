@@ -370,3 +370,43 @@ export const initialSources: DataSource[] = [
     color: '#10b981',
   }, // emerald-500
 ];
+
+// Analytic
+export interface AnalyticPoint {
+  date: string;
+  Positive: number;
+  Neutral: number;
+  Negative: number;
+}
+export const analyticData: AnalyticPoint[] = [
+  { date: 'Sep 01', Positive: 250, Neutral: 150, Negative: 50 },
+  { date: 'Sep 05', Positive: 300, Neutral: 200, Negative: 75 },
+  { date: 'Sep 10', Positive: 280, Neutral: 180, Negative: 60 },
+  { date: 'Sep 15', Positive: 350, Neutral: 220, Negative: 80 },
+  { date: 'Sep 20', Positive: 400, Neutral: 250, Negative: 90 },
+  { date: 'Sep 25', Positive: 380, Neutral: 240, Negative: 85 },
+  { date: 'Sep 30', Positive: 420, Neutral: 260, Negative: 95 },
+];
+
+export interface PlatformPoint {
+  name: string;
+  mentions: number;
+}
+export const platformData: PlatformPoint[] = [
+  { name: 'Facebook', mentions: 4320 },
+  { name: 'Twitter', mentions: 3207 },
+  { name: 'Instagram', mentions: 1084 },
+  { name: 'News API', mentions: 890 },
+];
+
+export interface TopKeyword {
+  name: string;
+  mentions: number;
+  sentiment: number;
+}
+export const topKeywordsData: TopKeyword[] = [
+  { name: 'MUIC', mentions: 987, sentiment: 72 },
+  { name: 'Admission', mentions: 312, sentiment: 40 },
+  { name: 'Salaya', mentions: 452, sentiment: 50 },
+  { name: 'Graduation', mentions: 189, sentiment: 85 },
+];
