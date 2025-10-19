@@ -49,7 +49,7 @@ const SentimentTable = ({ data }: TableProps) => {
         <tbody>
           {currentData.map((row) => (
             <tr key={row.date} className="border-t border-gray-200">
-              <td className="p-4 font-medium">{row.date}, 2024</td>
+              <td className="p-4 font-medium">{row.date}, 2025</td>
               <td className="p-4 text-emerald-600">{row.Positive}</td>
               <td className="p-4 text-amber-600">{row.Neutral}</td>
               <td className="p-4 text-red-600">{row.Negative}</td>

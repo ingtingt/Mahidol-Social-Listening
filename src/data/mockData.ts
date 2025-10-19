@@ -282,4 +282,5 @@ export const keywords = [
   'Salaya',
   'Admission',
   'Graduation',
+  'Exam',
 ];
