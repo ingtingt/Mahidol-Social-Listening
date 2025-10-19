@@ -25,6 +25,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Tags,
+  Database,
 } from 'lucide-react';
 
 const navItems = [
@@ -33,8 +34,8 @@ const navItems = [
   { name: 'Sentiment Trends', icon: TrendingUp, path: '/sentiment-trends' },
   { name: 'Keyword Extractor', icon: Tags, path: '/keyword-extractor' },
   {
-    name: 'Data Collection Schedule',
-    icon: Calendar,
+    name: 'Data Collection',
+    icon: Database,
     path: '/data-collection',
   },
   { name: 'API Settings', icon: Shield, path: '/api-settings' },

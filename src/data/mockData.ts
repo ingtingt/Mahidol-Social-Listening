@@ -324,3 +324,49 @@ export const dummyResults: ExtractorResults = {
     keywordsFound: 11,
   },
 };
+
+//Data-collection
+export interface DataSource {
+  id: number;
+  platform: string;
+  status: 'Active' | 'Paused';
+  keywords: string[];
+  lastCollected: string;
+  color: string; // We will use hex codes
+}
+
+// Data for the Data Collection page
+export const initialSources: DataSource[] = [
+  {
+    id: 1,
+    platform: 'Facebook',
+    status: 'Active',
+    keywords: ['Mahidol', 'MUIC'],
+    lastCollected: '2025-10-19 14:30',
+    color: '#3b82f6',
+  }, // blue-500
+  {
+    id: 2,
+    platform: 'Twitter',
+    status: 'Active',
+    keywords: ['Mahidol University', 'Salaya'],
+    lastCollected: '2025-10-19 16:00',
+    color: '#0ea5e9',
+  }, // sky-500
+  {
+    id: 3,
+    platform: 'Instagram',
+    status: 'Paused',
+    keywords: ['MUIC'],
+    lastCollected: '2025-10-18 12:00',
+    color: '#f43f5e',
+  }, // rose-500
+  {
+    id: 4,
+    platform: 'News API',
+    status: 'Active',
+    keywords: ['Mahidol'],
+    lastCollected: '2025-10-19 15:00',
+    color: '#10b981',
+  }, // emerald-500
+];
