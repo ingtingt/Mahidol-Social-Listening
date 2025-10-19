@@ -284,3 +284,43 @@ export const keywords = [
   'Graduation',
   'Exam',
 ];
+
+// Keyword Extractor
+interface KeywordResult {
+  text: string;
+  relevance: number;
+}
+
+interface KeywordStats {
+  wordCount: number;
+  keywordsFound: number;
+}
+
+export interface ExtractorResults {
+  mainKeywords: KeywordResult[];
+  subKeywords: KeywordResult[];
+  stats: KeywordStats;
+}
+
+// Data for the keyword extractor
+export const dummyResults: ExtractorResults = {
+  mainKeywords: [
+    { text: 'Mahidol University', relevance: 0.95 },
+    { text: 'International College', relevance: 0.92 },
+    { text: 'admission process', relevance: 0.88 },
+    { text: 'undergraduate programs', relevance: 0.85 },
+  ],
+  subKeywords: [
+    { text: 'Salaya campus', relevance: 0.75 },
+    { text: 'application requirements', relevance: 0.72 },
+    { text: 'curriculum', relevance: 0.68 },
+    { text: 'tuition fees', relevance: 0.65 },
+    { text: 'scholarships', relevance: 0.61 },
+    { text: 'academic excellence', relevance: 0.59 },
+    { text: 'student life', relevance: 0.55 },
+  ],
+  stats: {
+    wordCount: 152,
+    keywordsFound: 11,
+  },
+};

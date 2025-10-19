@@ -24,12 +24,14 @@ import {
   MoreHorizontal,
   ChevronLeft,
   ChevronRight,
+  Tags,
 } from 'lucide-react';
 
 const navItems = [
   { name: 'Overview', icon: LayoutGrid, path: '/overview' },
   { name: 'Keyword Tracker', icon: BarChart2, path: '/keyword-tracker' },
   { name: 'Sentiment Trends', icon: TrendingUp, path: '/sentiment-trends' },
+  { name: 'Keyword Extractor', icon: Tags, path: '/keyword-extractor' },
   {
     name: 'Data Collection Schedule',
     icon: Calendar,
