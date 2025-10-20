@@ -410,3 +410,49 @@ export const topKeywordsData: TopKeyword[] = [
   { name: 'Salaya', mentions: 452, sentiment: 50 },
   { name: 'Graduation', mentions: 189, sentiment: 85 },
 ];
+
+//Profile Page
+export interface UserProfile {
+  fullName: string;
+  thaiName: string;
+  studyInfo: {
+    id: string;
+    status: string;
+    major: string;
+    intake: string;
+  };
+  accounts: {
+    muic: string;
+    email: string;
+  };
+  personalInfo: {
+    thaiId: string;
+    birthDate: string;
+    gender: string;
+    phone: string;
+    address: string;
+  };
+}
+
+export const userProfileData: UserProfile = {
+  fullName: 'Mr. VZA',
+  thaiName: 'วีซ่าาาาาา',
+  studyInfo: {
+    id: '6481161',
+    status: 'Studying',
+    major: '[ ICCI ], Computer Engineering',
+    intake: 'Y2021T3',
+  },
+  accounts: {
+    muic: '6481161',
+    email: 'jinaphat.gun@student.mahidol.ac.th',
+  },
+  personalInfo: {
+    thaiId: '123456789',
+    birthDate: '01/01/2001',
+    gender: 'Male',
+    phone: '061234567',
+    address:
+      '999 Phutthamonthon Sai 4 Rd, Tambon Salaya, Amphoe Phutthamonthon, Chang Wat Nakhon Pathom 73170',
+  },
+};
