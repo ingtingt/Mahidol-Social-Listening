@@ -33,9 +33,9 @@ export default function DashboardLayout({
             ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}
           `}
       >
-        <div className="flex justify-center border-b border-gray-200 h-14">
-          <Link href="/">
-            <Image src="/muiclogo.png" alt="logo" width={180} height={120} />
+        <div className="flex justify-center h-14">
+          <Link href="/overview">
+            <Image src="/muiclogo.png" alt="logo" width={230} height={150} />
           </Link>
         </div>
         <Menu />

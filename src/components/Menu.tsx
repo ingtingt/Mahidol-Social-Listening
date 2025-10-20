@@ -47,7 +47,7 @@ const Menu = () => {
   const pathname = usePathname();
   return (
     <div className="flex flex-col w-60 z-20 transform transition-transform duration-300 ease-in-out h-full">
-      <div className="px-4 py-3 flex items-center">
+      {/* <div className="px-4 py-3 flex items-center">
         <img
           src="https://placehold.co/40x40/9333EA/FFFFFF?text=M"
           alt="User Logo"
@@ -57,11 +57,11 @@ const Menu = () => {
           <h1 className="font-bold text-sm">My Workspace</h1>
           <p className="text-xs text-gray-500">MU sentiment Dashboard</p>
         </div>
-      </div>
-      <div className="px-4 pb-4 flex-1 overflow-y-auto">
-        <h2 className="text-xs text-gray-500 font-semibold uppercase mb-2">
+      </div> */}
+      <div className="px-4 pb-4 pt-4 flex-1 overflow-y-auto">
+        {/* <h2 className="text-xs text-gray-500 font-semibold uppercase mb-2">
           MAIN MENU
-        </h2>
+        </h2> */}
         <ul className="space-y-1">
           {navItems.map((item) => {
             const isActive = pathname === item.path;
