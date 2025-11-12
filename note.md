@@ -13,3 +13,12 @@ npx prisma db seed
 ## 4. Manually Updating the Client
 
 npx prisma generate
+
+# Git Push
+
+Push finished edit
+git push starter teetath-analytic-page
+
+# Creates and switches to a new branch for your feature
+
+git checkout -b teetath-analytic-page
