@@ -49,8 +49,8 @@ model Post {
   sharesCount     Int
   commentsCount   Int
   
-  // The sentiment of the main post, analyzed by your app
-  sentiment       String?   // "Positive", "Neutral", "Negative"
+  // The category of the main post, analyzed by your app
+  category       String?   // e.g., "Event", "Warning annoucements"
   
   // Relation: A post has many comments (One-to-Many)
   comments        Comment[]
@@ -67,8 +67,8 @@ model Comment {
   likeCount    Int
   replyCount   Int
   
-  // The sentiment of the comment, analyzed by your app
-  sentiment    String?   // "Positive", "Neutral", "Negative"
+  // The category of the comment, analyzed by your app
+  category    String?   // "Positive", "Neutral", "Negative"
   
   // Relation: Each comment belongs to one post
   post         Post      @relation(fields: [postId], references: [id])
