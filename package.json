@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "load-data": "ts-node --compiler-options \"{\\\"module\\\":\\\"CommonJS\\\"}\" scripts/loadAndMergeData.ts"
+    "load-data": "ts-node --compiler-options \"{\\\"module\\\":\\\"CommonJS\\\"}\" scripts/loadAndMergeData.ts",
+    "seed": "ts-node --compiler-options \"{\\\"module\\\":\\\"CommonJS\\\"}\" prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.0",

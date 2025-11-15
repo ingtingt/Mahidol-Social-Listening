@@ -1,27 +1,95 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
-import { initialKeywords } from '@/data/mockData'; // We'll move the data in Step 4
-import KeywordTable from '@/components/KeywordTable'; // We'll create this next
-import AddKeywordModal from '@/components/AddKeywordModal'; // And this one
+import { Keyword } from '@prisma/client';
+import KeywordTable from '@/components/KeywordTable';
+import AddKeywordModal from '@/components/AddKeywordModal';
 
 const KeywordTrackerPage = () => {
-  const [keywords, setKeywords] = useState(initialKeywords);
+  const [keywords, setKeywords] = useState<Keyword[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingKeyword, setEditingKeyword] = useState<Keyword | null>(null);
 
-  const handleAddKeyword = (newKeyword: { name: string; type: string }) => {
-    setKeywords((prev) => [
-      ...prev,
-      {
-        ...newKeyword,
-        id: prev.length + 1,
-        mentions: 0,
-        positive: 0,
-        neutral: 100,
-        negative: 0,
-      },
-    ]);
+  // This fetches your keywords
+  useEffect(() => {
+    const fetchKeywords = async () => {
+      try {
+        const response = await fetch('/api/keywords');
+        const data = await response.json();
+        setKeywords(data);
+      } catch (error) {
+        console.error('Failed to load keywords:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchKeywords();
+  }, []);
+
+  // This function handles BOTH Add and Edit
+  const handleSave = async (
+    keywordData: { name: string; type: string },
+    id?: number
+  ) => {
+    if (id) {
+      // UPDATE (EDIT) LOGIC
+      try {
+        const response = await fetch(`/api/keywords/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(keywordData),
+        });
+        if (!response.ok) throw new Error('Failed to update');
+        const updatedKeyword = await response.json();
+
+        setKeywords((prev) =>
+          prev.map((kw) => (kw.id === id ? updatedKeyword : kw))
+        );
+      } catch (error) {
+        console.error('Error updating keyword:', error);
+      }
+    } else {
+      // CREATE (ADD) LOGIC
+      try {
+        const response = await fetch('/api/keywords', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(keywordData),
+        });
+        if (!response.ok) throw new Error('Failed to add');
+        const newKeywordFromDB = await response.json();
+        setKeywords((prev) => [newKeywordFromDB, ...prev]);
+      } catch (error) {
+        console.error('Error adding keyword:', error);
+      }
+    }
+  };
+
+  const handleDeleteKeyword = async (id: number) => {
+    // This updates the UI immediately
+    setKeywords((prev) => prev.filter((kw) => kw.id !== id));
+
+    // This sends the delete request to your API
+    try {
+      await fetch(`/api/keywords/${id}`, {
+        method: 'DELETE',
+      });
+    } catch (error) {
+      console.error('Error deleting keyword:', error);
+      // Here you would add logic to put the keyword back if the API call fails
+    }
+  };
+
+  const openAddModal = () => {
+    setEditingKeyword(null);
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (keyword: Keyword) => {
+    setEditingKeyword(keyword);
+    setIsModalOpen(true);
   };
 
   return (
@@ -29,7 +97,8 @@ const KeywordTrackerPage = () => {
       {isModalOpen && (
         <AddKeywordModal
           onClose={() => setIsModalOpen(false)}
-          onAdd={handleAddKeyword}
+          onAdd={handleSave} // <-- CHANGED from onSave to onAdd
+          keywordToEdit={editingKeyword}
         />
       )}
 
@@ -39,7 +108,7 @@ const KeywordTrackerPage = () => {
           <p className="text-gray-500 mt-1">Manage and track your keywords</p>
         </div>
         <button
-          onClick={() => setIsModalOpen(true)}
+          onClick={openAddModal}
           className="flex items-center bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-purple-700"
         >
           <Plus size={20} className="mr-2" />
@@ -48,7 +117,16 @@ const KeywordTrackerPage = () => {
       </div>
 
       <div className="mt-8">
-        <KeywordTable keywords={keywords} setKeywords={setKeywords} />
+        {isLoading ? (
+          <p>Loading keywords...</p>
+        ) : (
+          <KeywordTable
+            keywords={keywords}
+            setKeywords={setKeywords}
+            onDelete={handleDeleteKeyword}
+            onEdit={openEditModal}
+          />
+        )}
       </div>
     </div>
   );

@@ -1,21 +1,36 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
+import { Keyword } from '@prisma/client';
 
 type ModalProps = {
   onClose: () => void;
-  onAdd: (keyword: { name: string; type: string }) => void;
+  onAdd: (keyword: { name: string; type: string }, id?: number) => void; // <-- CHANGED from onSave
+  keywordToEdit?: Keyword | null;
 };
 
-const AddKeywordModal = ({ onClose, onAdd }: ModalProps) => {
+const AddKeywordModal = ({ onClose, onAdd, keywordToEdit }: ModalProps) => {
+  // <-- CHANGED from onSave
   const [keyword, setKeyword] = useState('');
   const [mainKeyword, setMainKeyword] = useState(true);
+
+  const isEditMode = !!keywordToEdit;
+
+  useEffect(() => {
+    if (isEditMode) {
+      setKeyword(keywordToEdit.name);
+      setMainKeyword(keywordToEdit.type === 'Main');
+    }
+  }, [keywordToEdit, isEditMode]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (keyword.trim()) {
-      onAdd({ name: keyword, type: mainKeyword ? 'Main' : 'Sub' });
+      onAdd(
+        { name: keyword, type: mainKeyword ? 'Main' : 'Sub' },
+        keywordToEdit?.id
+      ); // <-- CHANGED from onSave
       onClose();
     }
   };
@@ -24,7 +39,9 @@ const AddKeywordModal = ({ onClose, onAdd }: ModalProps) => {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
       <div className="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">Add New Keyword</h2>
+          <h2 className="text-2xl font-bold">
+            {isEditMode ? 'Edit Keyword' : 'Add New Keyword'}
+          </h2>
           <button
             onClick={onClose}
             className="p-2 rounded-full hover:bg-gray-200"
@@ -32,6 +49,7 @@ const AddKeywordModal = ({ onClose, onAdd }: ModalProps) => {
             <X size={20} />
           </button>
         </div>
+
         <form onSubmit={handleSubmit}>
           {/* Keyword Input */}
           <div className="mb-4">
@@ -76,7 +94,6 @@ const AddKeywordModal = ({ onClose, onAdd }: ModalProps) => {
             </div>
           </div>
 
-          {/* Action Buttons */}
           <div className="flex justify-end space-x-4">
             <button
               type="button"
@@ -89,7 +106,7 @@ const AddKeywordModal = ({ onClose, onAdd }: ModalProps) => {
               type="submit"
               className="px-6 py-2 rounded-lg text-white bg-purple-600 hover:bg-purple-700"
             >
-              Add Keyword
+              {isEditMode ? 'Save Changes' : 'Add Keyword'}
             </button>
           </div>
         </form>
