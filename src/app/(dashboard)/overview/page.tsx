@@ -1,41 +1,116 @@
-import AttendanceChart from '@/components/AttendanceChart';
-import CountChart from '@/components/CountChart';
-import UserCard from '@/components/UserCard';
+'use client';
+
+import React, { useState, useEffect } from 'react';
 import StatCard from '@/components/StatCard';
 import {
-  Users,
-  BarChart,
-  MessageSquare,
   Users2,
   MessageSquareText,
   MessageCircleMore,
   BarChart2,
 } from 'lucide-react';
-import React from 'react';
-import SentimentCard from '@/components/SentimentCard';
+import { ChartConfig } from '@/components/ui/chart';
+
+// Import all your components
+import CategoryBreakdown from '@/components/CategoryBreakdown';
 import TopMessagesCard from '@/components/TopMessagesCard';
-import {
-  platformInsightsData,
-  sentimentData,
-  socialMediaCardData,
-  calendarDaysData,
-  topMessagesData,
-} from '@/data/mockData';
 import SocialMediaBreakdownCard from '@/components/SocialMediaBreakdownCard';
 import PlatformInsightsCard from '@/components/PlatformInsightsCard';
 
+// We still need mockData for colors and for the components we haven't connected yet
+import {
+  platformInsightsData,
+  socialMediaCardData,
+  calendarDaysData,
+  topMessagesData,
+  categoryDetails, // We use this ONLY for colors
+} from '@/data/mockData';
+import type { Post as PostType } from '@prisma/client';
+
+// --- Helper Function ---
+// THIS FUNCTION IS NOW FIXED
+const processCategoryData = (posts: PostType[]) => {
+  const categoryCounts: { [key: string]: number } = {};
+
+  // 1. Count all categories from the real data
+  for (const post of posts) {
+    const category = post.category || 'Uncategorized';
+    categoryCounts[category] = (categoryCounts[category] || 0) + 1;
+  }
+
+  // Create a lookup map for colors from mockData
+  const colorMap = new Map<string, string>();
+  for (const detail of categoryDetails) {
+    colorMap.set(detail.name, detail.color);
+  }
+  const defaultColor = '#9ca3af'; // gray-400 for any unknown
+
+  // 2. Build chartData *from the counts*
+  const chartData = Object.entries(categoryCounts).map(([name, count]) => ({
+    name: name,
+    count: count,
+    fill: colorMap.get(name) || defaultColor,
+  }));
+
+  // 3. Build chartConfig *from the counts*
+  const chartConfig: ChartConfig = {
+    count: { label: 'Posts' },
+    ...Object.fromEntries(
+      Object.keys(categoryCounts).map((name) => [
+        name.toLowerCase().replace(/ /g, '-'), // key
+        {
+          label: name,
+          color: colorMap.get(name) || defaultColor, // Look up the color
+        },
+      ])
+    ),
+  };
+
+  return { chartData, chartConfig };
+};
+// --- End Helper Function ---
+
 const Overviewpage = () => {
+  const [posts, setPosts] = useState<PostType[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const [categoryChartData, setCategoryChartData] = useState<any[]>([]);
+  const [categoryChartConfig, setCategoryChartConfig] = useState<ChartConfig>(
+    {}
+  );
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('/api/posts');
+        const data: PostType[] = await response.json();
+
+        setPosts(data);
+
+        const { chartData, chartConfig } = processCategoryData(data);
+        setCategoryChartData(chartData);
+        setCategoryChartConfig(chartConfig);
+      } catch (error) {
+        console.error('Failed to fetch posts:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (isLoading) {
+    // ... (loading state is the same)
+  }
+
   return (
-    // Main container for the overview page
     <div className="flex flex-col gap-8">
-      <div>
-        <p className="text-sm text-gray-500">Page / Overview</p>
-        <h1 className="text-3xl font-bold text-gray-800">Overview</h1>
-      </div>
+      {/* ... (Title section is the same) ... */}
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
           title="Total Messages Collected"
-          value="6,650"
+          value={posts.length.toLocaleString()}
           change={14}
           changeText="+ 210 today"
           Icon={Users2}
@@ -63,23 +138,22 @@ const Overviewpage = () => {
         />
       </div>
 
-      {/* Sentiment Card) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-        {/* Sentiment chart will go here */}
         <div className="lg:col-span-2 flex flex-col gap-6">
-          <SentimentCard data={sentimentData} />
+          {/* This component will now receive the *complete* data */}
+          <CategoryBreakdown
+            chartData={categoryChartData}
+            chartConfig={categoryChartConfig}
+          />
+
           <TopMessagesCard days={calendarDaysData} messages={topMessagesData} />
         </div>
 
-        {/* Social Media Breakdown will go here */}
         <div className="lg:col-span-1 flex flex-col gap-6">
           <SocialMediaBreakdownCard data={socialMediaCardData} />
           <PlatformInsightsCard insights={platformInsightsData} />
         </div>
       </div>
-
-      {/* Bottom chart section (placeholder) */}
-      <div></div>
     </div>
   );
 };

@@ -456,3 +456,29 @@ export const userProfileData: UserProfile = {
       '999 Phutthamonthon Sai 4 Rd, Tambon Salaya, Amphoe Phutthamonthon, Chang Wat Nakhon Pathom 73170',
   },
 };
+
+// Data for the Category Breakdown chart
+export const categoryDetails = [
+  { name: 'Systemic Annoucements', color: 'oklch(62.7% 0.265 303.9)' }, // purple-500
+  { name: 'Events', color: 'oklch(62.3% 0.214 259.815)' }, // blue-500
+  { name: 'Promotions&Special deals', color: 'oklch(72.3% 0.219 149.579)' }, // green-500
+  { name: 'Opportunity&Recruitment', color: '#eab308' }, // yellow-500
+  { name: 'Guides', color: '#0ea5e9' }, // sky-500
+  { name: 'miscellaneous', color: '#9ca3af' }, // gray-400
+  { name: 'Warning annoucements', color: '#ef4444' }, // red-500
+  { name: 'Uncategorized', color: '#9ca3af' }, // gray-400 (for any unmatched posts)
+];
+
+// Data for the recharts component
+export const categoryChartData = [
+  {
+    name: 'Categories',
+    Events: 13,
+    Guides: 25,
+    miscellaneous: 12,
+    Opportunities: 5,
+    Promotion: 20,
+    'Systemic Announcements': 10,
+    'Warning annoucements': 15,
+  },
+];
