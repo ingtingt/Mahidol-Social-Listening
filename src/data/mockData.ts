@@ -482,3 +482,5 @@ export const categoryChartData = [
     'Warning annoucements': 15,
   },
 ];
+
+export const categories = categoryDetails.map((c) => c.name);

@@ -26,19 +26,23 @@ import {
   ChevronRight,
   Tags,
   Database,
+  Beaker,
+  Vote,
+  Key,
+  TextSearch,
 } from 'lucide-react';
 
 const navItems = [
   { name: 'Overview', icon: LayoutGrid, path: '/overview' },
-  { name: 'Keyword Tracker', icon: BarChart2, path: '/keyword-tracker' },
+  { name: 'Keyword Tracker', icon: Key, path: '/keyword-tracker' },
   { name: 'Sentiment Trends', icon: TrendingUp, path: '/sentiment-trends' },
-  { name: 'Keyword Extractor', icon: Tags, path: '/keyword-extractor' },
+  { name: 'Keyword Extractor', icon: TextSearch, path: '/keyword-extractor' },
   {
     name: 'Data Collection',
     icon: Database,
     path: '/data-collection',
   },
-  { name: 'API Settings', icon: Shield, path: '/api-settings' },
+  { name: 'Model Evaluation', icon: Vote, path: '/model-evaluation' },
   { name: 'Analytic', icon: FileText, path: '/analytic' },
   { name: 'Settings', icon: Settings, path: '/settings' },
 ];
