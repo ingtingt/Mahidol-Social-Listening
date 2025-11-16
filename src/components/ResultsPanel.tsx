@@ -2,6 +2,12 @@ import React from 'react';
 import { LoaderCircle, Tags, Info } from 'lucide-react';
 import type { ExtractorResults } from '@/data/mockData';
 import KeywordTag from './KeywordTag';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 type ResultsPanelProps = {
   results: ExtractorResults | null;
@@ -13,7 +19,16 @@ const ResultsPanel = ({ results, isLoading }: ResultsPanelProps) => {
     <div className="bg-white rounded-xl shadow-sm h-full flex flex-col">
       <div className="p-4 border-b flex justify-between items-center">
         <h2 className="font-bold text-lg">Extracted Keywords</h2>
-        <Info size={18} className="text-gray-400" />
+        <TooltipProvider>
+          <Tooltip delayDuration={0}>
+            <TooltipTrigger asChild>
+              <Info size={18} className="text-gray-400 cursor-pointer" />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>by gemini-2.5-flash</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
 
       <div className="flex-1 overflow-y-auto">
@@ -21,7 +36,7 @@ const ResultsPanel = ({ results, isLoading }: ResultsPanelProps) => {
           <div className="h-full flex flex-col justify-center items-center text-gray-500">
             <LoaderCircle className="animate-spin w-12 h-12 mb-4" />
             <p className="font-semibold">Extracting Keywords...</p>
-            <p className="text-sm">Please wait a moment.</p>
+            <p className="text-sm text-gray-400">Please wait a moment.</p>
           </div>
         ) : !results ? (
           <div className="h-full flex flex-col justify-center items-center text-center text-gray-500 p-4">

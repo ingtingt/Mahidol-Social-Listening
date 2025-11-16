@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Wand2 } from 'lucide-react';
-import { dummyResults } from '@/data/mockData';
+// Import the types and components needed
 import type { ExtractorResults } from '@/data/mockData';
 import ResultsPanel from '@/components/ResultsPanel';
 
@@ -11,14 +11,53 @@ const KeywordExtractorPage = () => {
   const [results, setResults] = useState<ExtractorResults | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleExtract = () => {
+  // This function calls your new /api/extract
+  const handleExtract = async () => {
     if (!text.trim()) return;
+
     setIsLoading(true);
     setResults(null);
-    setTimeout(() => {
-      setResults(dummyResults);
+
+    try {
+      const response = await fetch('/api/extract', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text }), // Send the text
+      });
+
+      if (!response.ok) {
+        throw new Error('API request failed');
+      }
+
+      const data = await response.json();
+
+      // Create the 'stats' object ourselves
+      const wordCount = text.trim().split(/\s+/).length;
+      const keywordsFound =
+        (data.mainKeywords?.length || 0) + (data.subKeywords?.length || 0);
+
+      // Set the final results to update the UI
+      setResults({
+        mainKeywords: (data.mainKeywords || []).map((kw: string) => ({
+          text: kw,
+          relevance: 0.9,
+        })), // Add relevance
+        subKeywords: (data.subKeywords || []).map((kw: string) => ({
+          text: kw,
+          relevance: 0.7,
+        })), // Add relevance
+        stats: {
+          wordCount,
+          keywordsFound,
+        },
+      });
+    } catch (error) {
+      console.error('Error extracting keywords:', error);
+    } finally {
       setIsLoading(false);
-    }, 2000); // Simulate API call
+    }
   };
 
   return (
@@ -30,7 +69,6 @@ const KeywordExtractorPage = () => {
         </p>
       </div>
 
-      {/* Set a min-height to ensure panels don't collapse on small screens */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-[60vh]">
         {/* Input Panel */}
         <div className="bg-white rounded-xl shadow-sm flex flex-col">

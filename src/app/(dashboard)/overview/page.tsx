@@ -1,15 +1,21 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import AttendanceChart from '@/components/AttendanceChart';
+import CountChart from '@/components/CountChart';
+import UserCard from '@/components/UserCard';
 import StatCard from '@/components/StatCard';
 import {
+  Users,
+  BarChart,
+  MessageSquare,
   Users2,
   MessageSquareText,
   MessageCircleMore,
   BarChart2,
 } from 'lucide-react';
 import { ChartConfig } from '@/components/ui/chart';
-
+import SentimentCard from '@/components/SentimentCard';
 // Import all your components
 import CategoryBreakdown from '@/components/CategoryBreakdown';
 import TopMessagesCard from '@/components/TopMessagesCard';
@@ -25,7 +31,7 @@ import {
   categoryDetails, // We use this ONLY for colors
 } from '@/data/mockData';
 import type { Post as PostType } from '@prisma/client';
-
+import AddKeywordModal from '@/components/AddKeywordModal';
 // --- Helper Function ---
 // THIS FUNCTION IS NOW FIXED
 const processCategoryData = (posts: PostType[]) => {
@@ -72,6 +78,7 @@ const processCategoryData = (posts: PostType[]) => {
 const Overviewpage = () => {
   const [posts, setPosts] = useState<PostType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isExtracting, setIsExtracting] = useState(false);
 
   const [categoryChartData, setCategoryChartData] = useState<any[]>([]);
   const [categoryChartConfig, setCategoryChartConfig] = useState<ChartConfig>(
@@ -105,7 +112,10 @@ const Overviewpage = () => {
 
   return (
     <div className="flex flex-col gap-8">
-      {/* ... (Title section is the same) ... */}
+      <div>
+        <p className="text-sm text-gray-500">Page / Overview</p>
+        <h1 className="text-3xl font-bold text-gray-800">Overview</h1>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
