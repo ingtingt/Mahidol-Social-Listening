@@ -1,39 +1,49 @@
-'use client';
+'use client'; // This component now fetches data, so it must be a client component
 
-import React from 'react';
-import {
-  Plus,
-  MoreVertical,
-  Trash2,
-  PauseCircle,
-  PlayCircle,
-} from 'lucide-react';
-import type { DataSource } from '@/data/mockData';
+import React, { useState, useEffect } from 'react';
+import { Facebook } from 'lucide-react';
+// We need to import the Post type to understand the data from the API
+import type { Post } from '@prisma/client';
 
-type ManageSourcesProps = {
-  sources: DataSource[];
-  setSources: React.Dispatch<React.SetStateAction<DataSource[]>>;
-};
+const ManageSources = () => {
+  const [totalPosts, setTotalPosts] = useState(0);
+  const [totalComments, setTotalComments] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
-const ManageSources = ({ sources, setSources }: ManageSourcesProps) => {
-  const toggleStatus = (id: number) => {
-    setSources(
-      sources.map((s) =>
-        s.id === id
-          ? { ...s, status: s.status === 'Active' ? 'Paused' : 'Active' }
-          : s
-      )
-    );
-  };
+  useEffect(() => {
+    // This function fetches all posts to calculate the totals
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch('/api/posts');
+        if (!response.ok) {
+          throw new Error('Failed to fetch data');
+        }
+        const data: Post[] = await response.json();
+
+        // Calculate totals
+        const postsCount = data.length;
+        const commentsCount = data.reduce(
+          (acc, post) => acc + post.commentsCount,
+          0
+        );
+
+        setTotalPosts(postsCount);
+        setTotalComments(commentsCount);
+      } catch (error) {
+        console.error('Failed to fetch post data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []); // The empty array [] means this runs once when the component mounts
 
   return (
     <div className="bg-white rounded-xl shadow-sm overflow-hidden">
       <div className="p-4 flex justify-between items-center">
         <h3 className="text-lg font-bold">Data Sources</h3>
-        <button className="flex items-center bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-purple-700">
-          <Plus size={16} className="mr-2" />
-          Add New Source
-        </button>
       </div>
       <table className="w-full text-sm">
         <thead className="bg-gray-50">
@@ -41,72 +51,30 @@ const ManageSources = ({ sources, setSources }: ManageSourcesProps) => {
             <th className="p-4 text-left font-semibold text-gray-600">
               PLATFORM
             </th>
+            {/* Updated Columns */}
             <th className="p-4 text-left font-semibold text-gray-600">
-              STATUS
+              TOTAL POSTS
             </th>
             <th className="p-4 text-left font-semibold text-gray-600">
-              TRACKED KEYWORDS
-            </th>
-            <th className="p-4 text-left font-semibold text-gray-600">
-              LAST COLLECTED
-            </th>
-            <th className="p-4 text-left font-semibold text-gray-600">
-              ACTIONS
+              TOTAL COMMENTS
             </th>
           </tr>
         </thead>
         <tbody>
-          {sources.map((source) => (
-            <tr key={source.id} className="border-t border-gray-200">
-              <td className="p-4 font-medium flex items-center">
-                {/* THE COLOR FIX IS HERE 👇 */}
-                <div
-                  className="w-3 h-3 rounded-full mr-3"
-                  style={{ backgroundColor: source.color }}
-                ></div>
-                {source.platform}
-              </td>
-              <td className="p-4">
-                <span
-                  className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                    source.status === 'Active'
-                      ? 'bg-emerald-100 text-emerald-800'
-                      : 'bg-amber-100 text-amber-800'
-                  }`}
-                >
-                  {source.status}
-                </span>
-              </td>
-              <td className="p-4 text-gray-600">
-                {source.keywords.map((kw) => (
-                  <span
-                    key={kw}
-                    className="bg-gray-100 text-gray-700 px-2 py-1 rounded-md mr-1 text-xs"
-                  >
-                    {kw}
-                  </span>
-                ))}
-              </td>
-              <td className="p-4 text-gray-600">{source.lastCollected}</td>
-              <td className="p-4">
-                <div className="flex space-x-1">
-                  <button
-                    onClick={() => toggleStatus(source.id)}
-                    className="p-2 text-gray-500 hover:bg-gray-100 rounded-full"
-                  >
-                    {source.status === 'Active' ? (
-                      <PauseCircle size={16} />
-                    ) : (
-                      <PlayCircle size={16} />
-                    )}
-                  </button>
-                  <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-full">
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              </td>
-            </tr>
-          ))}
+          <tr className="border-t border-gray-200">
+            <td className="p-4 font-medium flex items-center">
+              <div className="w-3 h-3 rounded-full bg-blue-500 mr-3"></div>
+              <Facebook className="w-4 h-4 mr-2 text-blue-500" />
+              Facebook
+            </td>
+            {/* Show real data (or "Loading...") */}
+            <td className="p-4 text-gray-600">
+              {isLoading ? 'Loading...' : totalPosts.toLocaleString()}
+            </td>
+            <td className="p-4 text-gray-600">
+              {isLoading ? 'Loading...' : totalComments.toLocaleString()}
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>

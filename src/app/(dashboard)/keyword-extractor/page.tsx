@@ -1,20 +1,38 @@
 'use client';
 
-import React, { useState } from 'react';
+// 1. Import all necessary hooks and components
+import React, { useState, useEffect } from 'react';
 import { Wand2 } from 'lucide-react';
 import type { ExtractorResults } from '@/data/mockData';
 import ResultsPanel from '@/components/ResultsPanel';
-import AddKeywordModal from '@/components/AddKeywordModal'; // 1. Import the modal
-import { Keyword } from '@prisma/client'; // 2. Import the Keyword type
+import AddKeywordModal from '@/components/AddKeywordModal';
+import { Keyword } from '@prisma/client';
 
 const KeywordExtractorPage = () => {
+  // State for the text area
   const [text, setText] = useState('');
+
+  // State for the AI results
   const [results, setResults] = useState<ExtractorResults | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  // State for the "Add Keyword" modal
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [keywordToAdd, setKeywordToAdd] = useState<Partial<Keyword> | null>(
     null
   );
+
+  // 2. Check for text from session storage when the page loads
+  useEffect(() => {
+    const textToLoad = sessionStorage.getItem('textToExtract');
+    if (textToLoad) {
+      setText(textToLoad);
+      // Clear storage so it doesn't load again on refresh
+      sessionStorage.removeItem('textToExtract');
+    }
+  }, []); // The empty array [] means this runs only once
+
+  // 3. This function calls your Gemini API
   const handleExtract = async () => {
     if (!text.trim()) return;
 
@@ -36,7 +54,7 @@ const KeywordExtractorPage = () => {
 
       const data = await response.json();
 
-      // Create the 'stats' object ourselves
+      // Create the 'stats' object
       const wordCount = text.trim().split(/\s+/).length;
       const keywordsFound =
         (data.mainKeywords?.length || 0) + (data.subKeywords?.length || 0);
@@ -45,12 +63,12 @@ const KeywordExtractorPage = () => {
       setResults({
         mainKeywords: (data.mainKeywords || []).map((kw: string) => ({
           text: kw,
-          relevance: 0.9,
-        })), // Add relevance
+          relevance: 0.9, // Add dummy relevance
+        })),
         subKeywords: (data.subKeywords || []).map((kw: string) => ({
           text: kw,
-          relevance: 0.7,
-        })), // Add relevance
+          relevance: 0.7, // Add dummy relevance
+        })),
         stats: {
           wordCount,
           keywordsFound,
@@ -63,55 +81,30 @@ const KeywordExtractorPage = () => {
     }
   };
 
-  const handleSaveKeyword = async (keywordName: string) => {
-    try {
-      // We'll default all extracted keywords to "Sub" type
-      const response = await fetch('/api/keywords', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: keywordName,
-          type: 'Sub', // Defaulting to 'Sub'
-        }),
-      });
-
-      if (response.status === 409) {
-        // 409 is the "Conflict" error we set up for duplicates
-        alert(`Keyword "${keywordName}" already exists in your tracker.`);
-      } else if (!response.ok) {
-        throw new Error('Failed to add keyword');
-      } else {
-        alert(`Added "${keywordName}" to your Keyword Tracker!`);
-      }
-    } catch (error) {
-      console.error('Error saving keyword:', error);
-      alert(`Could not save keyword "${keywordName}".`);
-    }
-  };
+  // 4. This function opens the modal with the pre-filled data
   const handleOpenAddModal = (
     keywordName: string,
     keywordType: 'Main' | 'Sub'
   ) => {
-    // Set the keyword to add, pre-filling the name
     setKeywordToAdd({
       name: keywordName,
       type: keywordType,
     });
     setIsModalOpen(true);
   };
+
+  // 5. This function is passed to the modal to save the new keyword
   const handleSaveFromModal = async (
     keywordData: { name: string; type: string },
-    id?: number // id will be undefined, so this will only do "ADD" logic
+    id?: number // id will be undefined here, so it will only "ADD"
   ) => {
     try {
       const response = await fetch('/api/keywords', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: keywordData.name, // Use the name from the modal
-          type: keywordData.type, // Use the type from the modal
+          name: keywordData.name, // Use the (potentially edited) name from the modal
+          type: keywordData.type, // Use the selected type from the modal
         }),
       });
 
@@ -127,17 +120,18 @@ const KeywordExtractorPage = () => {
       alert(`Could not save keyword "${keywordData.name}".`);
     }
   };
+
   return (
     <div className="flex flex-col gap-6">
+      {/* 6. Conditionally render the modal */}
       {isModalOpen && (
         <AddKeywordModal
           onClose={() => setIsModalOpen(false)}
           onAdd={handleSaveFromModal}
-          // We pass our pre-filled keyword data as the 'keywordToEdit' prop
-          // The modal will see this and pre-fill its form
           keywordToEdit={keywordToAdd as Keyword | null}
         />
       )}
+
       <div>
         <h1 className="text-3xl font-bold text-gray-800">Keyword Extractor</h1>
         <p className="text-gray-500 mt-1">
@@ -175,7 +169,7 @@ const KeywordExtractorPage = () => {
           </div>
         </div>
 
-        {/* Results Panel Component */}
+        {/* 7. Pass the new 'handleOpenAddModal' function to the Results Panel */}
         <ResultsPanel
           results={results}
           isLoading={isLoading}

@@ -30,7 +30,7 @@ const AddKeywordModal = ({ onClose, onAdd, keywordToEdit }: ModalProps) => {
       onAdd(
         { name: keyword, type: mainKeyword ? 'Main' : 'Sub' },
         keywordToEdit?.id
-      ); // <-- CHANGED from onSave
+      );
       onClose();
     }
   };

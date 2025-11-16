@@ -1,18 +1,39 @@
-import { ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
-import Image from 'next/image';
-import type { CalendarDay, TopMessage } from '@/data/mockData';
+'use client';
 
-type CardProps = {
-  days: CalendarDay[];
-  messages: TopMessage[];
+import {
+  ChevronLeft,
+  ChevronRight,
+  MoreHorizontal,
+  Wand2,
+  Facebook,
+  Twitter,
+  Instagram,
+} from 'lucide-react';
+import type { CalendarDay } from '@/data/mockData';
+import type { Post as PostType } from '@prisma/client'; // 1. Import the REAL Post type
+
+// Map platform names from your database to icons
+const platformIconMap: { [key: string]: React.ElementType } = {
+  Facebook: Facebook,
+  Twitter: Twitter,
+  Instagram: Instagram,
+  default: MoreHorizontal,
 };
 
-const TopMessagesCard = ({ days, messages }: CardProps) => {
+// 2. Update the props to accept PostType and the onExtract function
+type CardProps = {
+  days: CalendarDay[];
+  messages: PostType[];
+  onExtract: (post: PostType) => void;
+};
+
+const TopMessagesCard = ({ days, messages, onExtract }: CardProps) => {
   return (
     <div className="bg-white p-6 rounded-xl shadow-sm">
       <h3 className="font-bold text-lg">Top Messages by engagement</h3>
       <p className="text-sm text-gray-500 mt-1 mb-4">November 2024</p>
 
+      {/* This calendar part still uses mock data */}
       <div className="flex items-center justify-between mb-6">
         <button className="p-2 rounded-full hover:bg-gray-100">
           <ChevronLeft />
@@ -35,12 +56,22 @@ const TopMessagesCard = ({ days, messages }: CardProps) => {
         </button>
       </div>
 
+      {/* 3. This section now maps over REAL data (PostType[]) */}
       <div className="space-y-4">
-        {messages.map((item, index) => {
-          const { PlatformIcon } = item;
+        {messages.map((item) => {
+          // Use the real 'platform' string to get the icon
+          const PlatformIcon =
+            platformIconMap[item.platform] || platformIconMap.default;
+
           return (
-            <div key={index} className="flex items-start gap-4">
-              <div className="w-16 text-sm text-gray-500 pt-3">{item.time}</div>
+            <div key={item.id} className="flex items-start gap-4">
+              {/* Use the real 'createdAt' date */}
+              <div className="w-16 text-sm text-gray-500 pt-3">
+                {new Date(item.createdAt).toLocaleTimeString('en-US', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+              </div>
               <div className="flex-1 bg-gray-50 p-4 rounded-lg">
                 <div className="flex justify-between items-start">
                   <div className="flex items-center mb-2">
@@ -49,28 +80,19 @@ const TopMessagesCard = ({ days, messages }: CardProps) => {
                       {item.platform}
                     </span>
                   </div>
-                  <MoreHorizontal className="text-gray-400 cursor-pointer" />
+
+                  <button
+                    onClick={() => onExtract(item)}
+                    className="p-1 text-purple-600 hover:bg-purple-100 rounded-full"
+                    title="Suggest Keywords"
+                  >
+                    <Wand2 size={16} />
+                  </button>
                 </div>
-                <p className="text-sm text-gray-700 mb-3">{item.message}</p>
-                {item.imageUrls.length > 0 && (
-                  <div className="flex space-x-2">
-                    {item.imageUrls.slice(0, 2).map((url, i) => (
-                      <Image
-                        key={i}
-                        src={url}
-                        alt="engagement image"
-                        width={80}
-                        height={60}
-                        className="rounded-md w-1/3 object-cover shadow-md"
-                      />
-                    ))}
-                    {item.images > 2 && (
-                      <div className="rounded-md w-1/3 bg-purple-100 flex items-center justify-center font-bold text-purple-700 shadow-md">
-                        +{item.images - 2}
-                      </div>
-                    )}
-                  </div>
-                )}
+                {/* Use the real 'content' field */}
+                <p className="text-sm text-gray-700 mb-3 line-clamp-2">
+                  {item.content}
+                </p>
               </div>
             </div>
           );

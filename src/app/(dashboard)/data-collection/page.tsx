@@ -1,14 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
-import { initialSources } from '@/data/mockData';
-import type { DataSource } from '@/data/mockData';
-import ManageSources from '@/components/ManageSources';
 import CollectionSchedule from '@/components/CollectionSchedule';
+// We'll create these components next
+import ManageSources from '@/components/ManageSources';
+import DatabaseTable from '@/components/DatabaseTable';
 
 const DataCollectionPage = () => {
   const [activeTab, setActiveTab] = useState('Manage');
-  const [sources, setSources] = useState<DataSource[]>(initialSources);
 
   return (
     <div className="flex flex-col gap-6">
@@ -41,8 +40,6 @@ const DataCollectionPage = () => {
           >
             Collection Schedule
           </button>
-
-          {/* 1. ADDED THE NEW DATABASE TAB BUTTON */}
           <button
             onClick={() => setActiveTab('Database')}
             className={`px-4 py-2 text-sm font-semibold ${
@@ -56,18 +53,11 @@ const DataCollectionPage = () => {
         </div>
       </div>
 
+      {/* This now shows the correct component based on the active tab */}
       <div>
-        {/* 2. ADDED THE LOGIC TO SHOW THE DATABASE TAB CONTENT */}
-        {activeTab === 'Manage' && (
-          <ManageSources sources={sources} setSources={setSources} />
-        )}
-        {activeTab === 'Schedule' && <CollectionSchedule sources={sources} />}
-        {activeTab === 'Database' && (
-          <div className="bg-white rounded-xl shadow-sm p-6">
-            <h3 className="text-lg font-bold">Database Management</h3>
-            <p className="mt-2 text-gray-600">Database Content will go here.</p>
-          </div>
-        )}
+        {activeTab === 'Manage' && <ManageSources />}
+        {activeTab === 'Schedule' && <CollectionSchedule />}
+        {activeTab === 'Database' && <DatabaseTable />}
       </div>
     </div>
   );
