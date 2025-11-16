@@ -2,16 +2,19 @@
 
 import React, { useState } from 'react';
 import { Wand2 } from 'lucide-react';
-// Import the types and components needed
 import type { ExtractorResults } from '@/data/mockData';
 import ResultsPanel from '@/components/ResultsPanel';
+import AddKeywordModal from '@/components/AddKeywordModal'; // 1. Import the modal
+import { Keyword } from '@prisma/client'; // 2. Import the Keyword type
 
 const KeywordExtractorPage = () => {
   const [text, setText] = useState('');
   const [results, setResults] = useState<ExtractorResults | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-
-  // This function calls your new /api/extract
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [keywordToAdd, setKeywordToAdd] = useState<Partial<Keyword> | null>(
+    null
+  );
   const handleExtract = async () => {
     if (!text.trim()) return;
 
@@ -60,8 +63,81 @@ const KeywordExtractorPage = () => {
     }
   };
 
+  const handleSaveKeyword = async (keywordName: string) => {
+    try {
+      // We'll default all extracted keywords to "Sub" type
+      const response = await fetch('/api/keywords', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: keywordName,
+          type: 'Sub', // Defaulting to 'Sub'
+        }),
+      });
+
+      if (response.status === 409) {
+        // 409 is the "Conflict" error we set up for duplicates
+        alert(`Keyword "${keywordName}" already exists in your tracker.`);
+      } else if (!response.ok) {
+        throw new Error('Failed to add keyword');
+      } else {
+        alert(`Added "${keywordName}" to your Keyword Tracker!`);
+      }
+    } catch (error) {
+      console.error('Error saving keyword:', error);
+      alert(`Could not save keyword "${keywordName}".`);
+    }
+  };
+  const handleOpenAddModal = (
+    keywordName: string,
+    keywordType: 'Main' | 'Sub'
+  ) => {
+    // Set the keyword to add, pre-filling the name
+    setKeywordToAdd({
+      name: keywordName,
+      type: keywordType,
+    });
+    setIsModalOpen(true);
+  };
+  const handleSaveFromModal = async (
+    keywordData: { name: string; type: string },
+    id?: number // id will be undefined, so this will only do "ADD" logic
+  ) => {
+    try {
+      const response = await fetch('/api/keywords', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: keywordData.name, // Use the name from the modal
+          type: keywordData.type, // Use the type from the modal
+        }),
+      });
+
+      if (response.status === 409) {
+        alert(`Keyword "${keywordData.name}" already exists.`);
+      } else if (!response.ok) {
+        throw new Error('Failed to add keyword');
+      } else {
+        alert(`Added "${keywordData.name}" to your Keyword Tracker!`);
+      }
+    } catch (error) {
+      console.error('Error saving keyword:', error);
+      alert(`Could not save keyword "${keywordData.name}".`);
+    }
+  };
   return (
     <div className="flex flex-col gap-6">
+      {isModalOpen && (
+        <AddKeywordModal
+          onClose={() => setIsModalOpen(false)}
+          onAdd={handleSaveFromModal}
+          // We pass our pre-filled keyword data as the 'keywordToEdit' prop
+          // The modal will see this and pre-fill its form
+          keywordToEdit={keywordToAdd as Keyword | null}
+        />
+      )}
       <div>
         <h1 className="text-3xl font-bold text-gray-800">Keyword Extractor</h1>
         <p className="text-gray-500 mt-1">
@@ -100,7 +176,11 @@ const KeywordExtractorPage = () => {
         </div>
 
         {/* Results Panel Component */}
-        <ResultsPanel results={results} isLoading={isLoading} />
+        <ResultsPanel
+          results={results}
+          isLoading={isLoading}
+          onOpenAddModal={handleOpenAddModal}
+        />
       </div>
     </div>
   );

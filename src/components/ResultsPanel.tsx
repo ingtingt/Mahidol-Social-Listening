@@ -12,9 +12,14 @@ import {
 type ResultsPanelProps = {
   results: ExtractorResults | null;
   isLoading: boolean;
+  onOpenAddModal: (keywordName: string, keywordType: 'Main' | 'Sub') => void;
 };
 
-const ResultsPanel = ({ results, isLoading }: ResultsPanelProps) => {
+const ResultsPanel = ({
+  results,
+  isLoading,
+  onOpenAddModal,
+}: ResultsPanelProps) => {
   return (
     <div className="bg-white rounded-xl shadow-sm h-full flex flex-col">
       <div className="p-4 border-b flex justify-between items-center">
@@ -36,7 +41,7 @@ const ResultsPanel = ({ results, isLoading }: ResultsPanelProps) => {
           <div className="h-full flex flex-col justify-center items-center text-gray-500">
             <LoaderCircle className="animate-spin w-12 h-12 mb-4" />
             <p className="font-semibold">Extracting Keywords...</p>
-            <p className="text-sm text-gray-400">Please wait a moment.</p>
+            <p className="text-sm">Please wait a moment.</p>
           </div>
         ) : !results ? (
           <div className="h-full flex flex-col justify-center items-center text-center text-gray-500 p-4">
@@ -53,7 +58,13 @@ const ResultsPanel = ({ results, isLoading }: ResultsPanelProps) => {
               <h3 className="font-bold text-lg mb-3">Main Keywords</h3>
               <div className="flex flex-wrap gap-2">
                 {results.mainKeywords.map((kw) => (
-                  <KeywordTag key={kw.text} {...kw} />
+                  <KeywordTag
+                    key={kw.text}
+                    {...kw}
+                    onOpenAddModal={(keywordName) =>
+                      onOpenAddModal(keywordName, 'Main')
+                    }
+                  />
                 ))}
               </div>
             </div>
@@ -61,7 +72,13 @@ const ResultsPanel = ({ results, isLoading }: ResultsPanelProps) => {
               <h3 className="font-bold text-lg mb-3">Sub-Keywords</h3>
               <div className="flex flex-wrap gap-2">
                 {results.subKeywords.map((kw) => (
-                  <KeywordTag key={kw.text} {...kw} />
+                  <KeywordTag
+                    key={kw.text}
+                    {...kw}
+                    onOpenAddModal={(keywordName) =>
+                      onOpenAddModal(keywordName, 'Sub')
+                    }
+                  />
                 ))}
               </div>
             </div>
