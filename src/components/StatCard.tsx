@@ -24,7 +24,7 @@ const StatCard = ({
     <div className="flex-1 bg-white p-6 rounded-lg shadow-sm flex flex-col gap-4">
       {/* Top Section: Title and Icon */}
       <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-500">{title}</p>
+        <p className="text-lg text-gray-800">{title}</p>
         <div className="bg-blue-50 text-blue-500 p-2 rounded-lg">
           <Icon className="w-5 h-5" />
         </div>

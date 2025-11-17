@@ -74,7 +74,7 @@ const CategoryBreakdown = ({
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              className="text-xs" // Make labels smaller
+              className="text-xs text-black" // Make labels smaller
               width={120} // Give more space for labels
               // Truncate long labels to prevent overflow
               // tickFormatter={(value) =>

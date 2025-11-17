@@ -20,7 +20,7 @@ import AddKeywordModal from '@/components/AddKeywordModal';
 // Import types and mock data
 import {
   platformInsightsData,
-  // socialMediaCardData, // Removed
+  socialMediaCardData, // Removed
   // calendarDaysData, // No longer needed for TopMessagesCard
   categoryDetails, // We NEED this for colors/labels
 } from '@/data/mockData';
@@ -257,7 +257,7 @@ const Overviewpage = () => {
           </div>
           <div className="lg:col-span-1">
             {/* This component is still using mock data */}
-            <PlatformInsightsCard insights={platformInsightsData} />
+            <PlatformInsightsCard />
           </div>
         </div>
 
