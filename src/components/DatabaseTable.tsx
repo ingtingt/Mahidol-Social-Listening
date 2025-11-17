@@ -39,7 +39,6 @@ const DatabaseTable = () => {
     null
   );
 
-  // Initialize the router
   const router = useRouter();
 
   // Fetch all posts from your API on component load
@@ -70,9 +69,7 @@ const DatabaseTable = () => {
 
   // Function to handle clicking the "Extract" button
   const handleExtractClick = (content: string) => {
-    // Save the post's content to the browser's session
     sessionStorage.setItem('textToExtract', content);
-    // Navigate the user to the extractor page
     router.push('/keyword-extractor');
   };
 
@@ -121,15 +118,13 @@ const DatabaseTable = () => {
             <tbody className="divide-y divide-gray-200">
               {data.map((post) => {
                 const isExpanded = expandedRows.includes(post.id);
-
-                // Get the category name and color
                 const categoryName = post.category || 'Uncategorized';
                 const categoryColor =
                   colorMap.get(categoryName) || defaultColor;
 
                 return (
                   <tr key={post.id}>
-                    {/* Category Cell with Color */}
+                    {/* Category Cell */}
                     <td className="p-4 align-top w-1/6">
                       <div className="flex items-center">
                         <span
@@ -215,6 +210,17 @@ const DatabaseTable = () => {
                   {comment.author?.name || 'Anonymous'}
                 </p>
                 <p className="text-gray-700">{comment.message}</p>
+
+                {/* --- 4. THIS IS THE NEW BUTTON --- */}
+                <div className="flex items-center gap-4 mt-2">
+                  <button
+                    onClick={() => handleExtractClick(comment.message)}
+                    className="flex items-center text-xs text-purple-600 hover:underline"
+                  >
+                    <Wand2 size={14} className="mr-1" /> Extract Keywords
+                  </button>
+                </div>
+                {/* --- END NEW BUTTON --- */}
               </div>
             ))
           ) : (
