@@ -11,6 +11,7 @@ const KeywordTrackerPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingKeyword, setEditingKeyword] = useState<Keyword | null>(null);
+  const [typeFilter, setTypeFilter] = useState('All');
 
   // This fetches your keywords
   useEffect(() => {
@@ -92,6 +93,13 @@ const KeywordTrackerPage = () => {
     setIsModalOpen(true);
   };
 
+  const filteredKeywords = keywords.filter((keyword) => {
+    if (typeFilter === 'All') {
+      return true; // Show all keywords
+    }
+    return keyword.type === typeFilter; // Show only matching type
+  });
+
   return (
     <div className="relative">
       {isModalOpen && (
@@ -121,10 +129,12 @@ const KeywordTrackerPage = () => {
           <p>Loading keywords...</p>
         ) : (
           <KeywordTable
-            keywords={keywords}
+            keywords={filteredKeywords}
             setKeywords={setKeywords}
             onDelete={handleDeleteKeyword}
             onEdit={openEditModal}
+            typeFilter={typeFilter} // Pass the current filter value
+            setTypeFilter={setTypeFilter} // Pass the function to change it
           />
         )}
       </div>

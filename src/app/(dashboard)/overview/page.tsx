@@ -1,40 +1,43 @@
-'use client';
+'use client'; // This page now fetches data, so it must be a client component
 
 import React, { useState, useEffect } from 'react';
-import AttendanceChart from '@/components/AttendanceChart';
-import CountChart from '@/components/CountChart';
-import UserCard from '@/components/UserCard';
 import StatCard from '@/components/StatCard';
 import {
-  Users,
-  BarChart,
-  MessageSquare,
   Users2,
   MessageSquareText,
   MessageCircleMore,
   BarChart2,
 } from 'lucide-react';
-import { ChartConfig } from '@/components/ui/chart';
-import SentimentCard from '@/components/SentimentCard';
+import { ChartConfig } from '@/components/ui/chart'; // Import the ChartConfig type
+
 // Import all your components
 import CategoryBreakdown from '@/components/CategoryBreakdown';
 import TopMessagesCard from '@/components/TopMessagesCard';
-import SocialMediaBreakdownCard from '@/components/SocialMediaBreakdownCard';
+// import SocialMediaBreakdownCard from '@/components/SocialMediaBreakdownCard'; // Removed
 import PlatformInsightsCard from '@/components/PlatformInsightsCard';
+import AddKeywordModal from '@/components/AddKeywordModal';
 
-// We still need mockData for colors and for the components we haven't connected yet
+// Import types and mock data
 import {
   platformInsightsData,
-  socialMediaCardData,
-  calendarDaysData,
-  topMessagesData,
-  categoryDetails, // We use this ONLY for colors
+  // socialMediaCardData, // Removed
+  // calendarDaysData, // No longer needed for TopMessagesCard
+  categoryDetails, // We NEED this for colors/labels
 } from '@/data/mockData';
-import type { Post as PostType } from '@prisma/client';
-import AddKeywordModal from '@/components/AddKeywordModal';
-// --- Helper Function ---
-// THIS FUNCTION IS NOW FIXED
-const processCategoryData = (posts: PostType[]) => {
+import type {
+  Post as PostType,
+  Keyword,
+  Comment,
+  Author,
+} from '@prisma/client';
+import type { ExtractorResults } from '@/data/mockData';
+
+type PostWithRelations = PostType & {
+  keywords: Keyword[];
+  comments: (Comment & { author: Author | null })[];
+};
+
+const processCategoryData = (posts: PostWithRelations[]) => {
   const categoryCounts: { [key: string]: number } = {};
 
   // 1. Count all categories from the real data
@@ -54,7 +57,7 @@ const processCategoryData = (posts: PostType[]) => {
   const chartData = Object.entries(categoryCounts).map(([name, count]) => ({
     name: name,
     count: count,
-    fill: colorMap.get(name) || defaultColor,
+    fill: colorMap.get(name) || defaultColor, // Pass the direct hex code
   }));
 
   // 3. Build chartConfig *from the counts*
@@ -76,28 +79,63 @@ const processCategoryData = (posts: PostType[]) => {
 // --- End Helper Function ---
 
 const Overviewpage = () => {
-  const [posts, setPosts] = useState<PostType[]>([]);
+  const [posts, setPosts] = useState<PostWithRelations[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isExtracting, setIsExtracting] = useState(false);
-
+  const [totalPosts, setTotalPosts] = useState(0);
+  const [totalComments, setTotalComments] = useState(0);
+  const [mainKeywordMentions, setMainKeywordMentions] = useState(0);
+  const [subKeywordMentions, setSubKeywordMentions] = useState(0);
   const [categoryChartData, setCategoryChartData] = useState<any[]>([]);
   const [categoryChartConfig, setCategoryChartConfig] = useState<ChartConfig>(
     {}
+  );
+
+  // State for the "Add Keyword" modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [keywordToAdd, setKeywordToAdd] = useState<Partial<Keyword> | null>(
+    null
   );
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await fetch('/api/posts');
-        const data: PostType[] = await response.json();
+        const allPosts: PostWithRelations[] = await response.json();
 
-        setPosts(data);
+        setPosts(allPosts);
 
-        const { chartData, chartConfig } = processCategoryData(data);
+        // --- 4. CALCULATE STATS ---
+        let commentsCount = 0;
+        let mainKwCount = 0;
+        let subKwCount = 0;
+
+        for (const post of allPosts) {
+          // Sum total comments
+          commentsCount += post.commentsCount;
+
+          // Count keyword mentions by type
+          for (const keyword of post.keywords) {
+            if (keyword.type === 'Main') {
+              mainKwCount++;
+            } else if (keyword.type === 'Sub') {
+              subKwCount++;
+            }
+          }
+        }
+
+        // Set all stats
+        setTotalPosts(allPosts.length);
+        setTotalComments(commentsCount);
+        setMainKeywordMentions(mainKwCount);
+        setSubKeywordMentions(subKwCount);
+        // --- END CALCULATION ---
+
+        const { chartData, chartConfig } = processCategoryData(allPosts);
         setCategoryChartData(chartData);
         setCategoryChartConfig(chartConfig);
       } catch (error) {
-        console.error('Failed to fetch posts:', error);
+        console.error('Failed to fetch dashboard data:', error);
       } finally {
         setIsLoading(false);
       }
@@ -106,12 +144,75 @@ const Overviewpage = () => {
     fetchData();
   }, []);
 
+  // --- Functions for Keyword Extraction Modal ---
+  const handleExtractKeywords = (post: PostType) => {
+    sessionStorage.setItem('textToExtract', post.content);
+    // You would use next/navigation for this
+    // router.push('/keyword-extractor');
+    console.log('Navigating to extractor with post:', post.id);
+  };
+
+  const handleOpenAddModal = (
+    keywordName: string,
+    keywordType: 'Main' | 'Sub'
+  ) => {
+    setKeywordToAdd({
+      name: keywordName,
+      type: keywordType,
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleSaveFromModal = async (
+    keywordData: { name: string; type: string },
+    id?: number
+  ) => {
+    // This function calls your /api/keywords POST route
+    try {
+      const response = await fetch('/api/keywords', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(keywordData),
+      });
+
+      if (response.status === 409) {
+        alert(`Keyword "${keywordData.name}" already exists.`);
+      } else if (!response.ok) {
+        throw new Error('Failed to add keyword');
+      } else {
+        alert(`Added "${keywordData.name}" to your Keyword Tracker!`);
+        setIsModalOpen(false); // Close modal on success
+      }
+    } catch (error) {
+      console.error('Error saving keyword:', error);
+      alert(`Could not save keyword "${keywordData.name}".`);
+    }
+  };
+  // --- End Modal Functions ---
+
   if (isLoading) {
-    // ... (loading state is the same)
+    return (
+      <div className="flex flex-col gap-8">
+        <div>
+          <p className="text-sm text-gray-500">Page / Overview</p>
+          <h1 className="text-3xl font-bold text-gray-800">Overview</h1>
+        </div>
+        <div className="text-lg text-gray-600">Loading dashboard data...</div>
+      </div>
+    );
   }
 
   return (
     <div className="flex flex-col gap-8">
+      {/* Conditionally render the modal */}
+      {isModalOpen && (
+        <AddKeywordModal
+          onClose={() => setIsModalOpen(false)}
+          onAdd={handleSaveFromModal}
+          keywordToEdit={keywordToAdd as Keyword | null}
+        />
+      )}
+
       <div>
         <p className="text-sm text-gray-500">Page / Overview</p>
         <h1 className="text-3xl font-bold text-gray-800">Overview</h1>
@@ -119,51 +220,52 @@ const Overviewpage = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
-          title="Total Messages Collected"
-          value={posts.length.toLocaleString()}
-          change={14}
-          changeText="+ 210 today"
+          title="Total Messages"
+          value={totalPosts.toLocaleString()}
           Icon={Users2}
         />
         <StatCard
-          title="Main Keyword Mentions"
-          value="6,650"
-          change={14}
-          changeText="+ 210 today"
+          title="Main Keyword Messages"
+          value={mainKeywordMentions.toLocaleString()}
           Icon={MessageSquareText}
         />
         <StatCard
           title="Sub-Keyword Messages"
-          value="5,514"
-          change={20}
-          changeText="+ 70 today"
+          value={subKeywordMentions.toLocaleString()}
           Icon={MessageCircleMore}
         />
         <StatCard
-          title="Total Engagements"
-          value="5,514"
-          change={-10}
-          changeText="- 60 today"
+          title="Total Comments" // This should be (Reactions + Comments + Shares)
+          value={totalComments.toLocaleString()} // Temporarily showing total comments
           Icon={BarChart2}
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-        <div className="lg:col-span-2 flex flex-col gap-6">
-          {/* This component will now receive the *complete* data */}
-          <CategoryBreakdown
-            chartData={categoryChartData}
-            chartConfig={categoryChartConfig}
-          />
-
-          <TopMessagesCard days={calendarDaysData} messages={topMessagesData} />
+      {/* --- NEW LAYOUT --- */}
+      <div className="flex flex-col gap-6">
+        {/* First Row: Category Breakdown and Platform Insights */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <CategoryBreakdown
+              chartData={categoryChartData}
+              chartConfig={categoryChartConfig}
+            />
+          </div>
+          <div className="lg:col-span-1">
+            {/* This component is still using mock data */}
+            <PlatformInsightsCard insights={platformInsightsData} />
+          </div>
         </div>
 
-        <div className="lg:col-span-1 flex flex-col gap-6">
-          <SocialMediaBreakdownCard data={socialMediaCardData} />
-          <PlatformInsightsCard insights={platformInsightsData} />
+        {/* Second Row: Top Messages */}
+        <div>
+          <TopMessagesCard
+            messages={posts} // Pass the full, real list of posts
+            onExtract={handleExtractKeywords} // Pass the handler function
+          />
         </div>
       </div>
+      {/* --- END NEW LAYOUT --- */}
     </div>
   );
 };
