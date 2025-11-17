@@ -13,9 +13,9 @@ import {
   DialogDescription,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { format } from 'date-fns'; // Corrected import
+import { format } from 'date-fns';
 
-// --- 2. Define types for our data ---
+// --- Define types for our data ---
 type ScheduleData = {
   [key: string]: {
     posts: number;
@@ -43,7 +43,7 @@ const CollectionSchedule = () => {
 
   const router = useRouter(); // Initialize the router
 
-  // --- 3. Fetch the schedule dots on load ---
+  // --- Fetch the schedule dots on load ---
   useEffect(() => {
     const fetchSchedule = async () => {
       try {
@@ -57,7 +57,7 @@ const CollectionSchedule = () => {
     fetchSchedule();
   }, []); // Runs once on component mount
 
-  // --- 4. This function runs when a day is clicked ---
+  // --- This function runs when a day is clicked ---
   const handleDateClick = async (day: number) => {
     // Set the date and loading state for the modal
     const date = new Date(
@@ -87,13 +87,19 @@ const CollectionSchedule = () => {
     }
   };
 
-  // --- 5. This function sends text to the Keyword Extractor page ---
-  const handleExtractClick = (content: string) => {
-    sessionStorage.setItem('textToExtract', content);
+  // --- THIS IS THE FIX (Part 1) ---
+  // This function now accepts content AND the postId
+  const handleExtractClick = (content: string, postId: string) => {
+    const dataToStore = {
+      content: content,
+      postId: postId, // Now we have the post ID!
+    };
+    sessionStorage.setItem('textToExtract', JSON.stringify(dataToStore));
     router.push('/keyword-extractor');
   };
+  // --- END FIX ---
 
-  // --- 6. Calendar Logic ---
+  // --- Calendar Logic ---
   const monthNames = [
     'January',
     'February',
@@ -131,7 +137,6 @@ const CollectionSchedule = () => {
   // --- End Calendar Logic ---
 
   return (
-    // 7. Wrap the component in the Dialog
     <Dialog>
       <div className="bg-white rounded-xl shadow-sm p-4">
         {/* Header with Month/Year and navigation */}
@@ -186,7 +191,6 @@ const CollectionSchedule = () => {
               .split('T')[0];
             const events = scheduleData[dateString];
 
-            // Check if this day is "today"
             const today = new Date();
             const isToday =
               day === today.getDate() &&
@@ -194,7 +198,6 @@ const CollectionSchedule = () => {
               currentDate.getFullYear() === today.getFullYear();
 
             return (
-              // 8. Wrap each day in a DialogTrigger
               <DialogTrigger asChild key={day}>
                 <button
                   onClick={() => handleDateClick(day)}
@@ -245,7 +248,7 @@ const CollectionSchedule = () => {
         </div>
       </div>
 
-      {/* --- 9. The Modal Content --- */}
+      {/* --- The Modal Content --- */}
       <DialogContent className="max-w-3xl">
         <DialogHeader>
           <DialogTitle>
@@ -279,7 +282,6 @@ const CollectionSchedule = () => {
                         <p className="text-gray-700 line-clamp-3">
                           {post.content}
                         </p>
-                        {/* --- ADDED BUTTONS --- */}
                         <div className="flex items-center gap-4 mt-2">
                           <a
                             href={post.permalink}
@@ -290,8 +292,12 @@ const CollectionSchedule = () => {
                             <ExternalLink size={14} className="mr-1" /> View
                             Post
                           </a>
+
+                          {/* --- THIS IS THE FIX (Part 2) --- */}
                           <button
-                            onClick={() => handleExtractClick(post.content)}
+                            onClick={() =>
+                              handleExtractClick(post.content, post.id)
+                            }
                             className="flex items-center text-xs text-purple-600 hover:underline"
                           >
                             <Wand2 size={14} className="mr-1" /> Extract
@@ -318,10 +324,15 @@ const CollectionSchedule = () => {
                           {comment.author?.name || 'Anonymous'}
                         </p>
                         <p className="text-gray-700">{comment.message}</p>
-                        {/* --- ADDED BUTTONS --- */}
                         <div className="flex items-center gap-4 mt-2">
+                          {/* --- THIS IS THE FIX (Part 3) --- */}
                           <button
-                            onClick={() => handleExtractClick(comment.message)}
+                            onClick={() =>
+                              handleExtractClick(
+                                comment.message,
+                                comment.postId
+                              )
+                            }
                             className="flex items-center text-xs text-purple-600 hover:underline"
                           >
                             <Wand2 size={14} className="mr-1" /> Extract

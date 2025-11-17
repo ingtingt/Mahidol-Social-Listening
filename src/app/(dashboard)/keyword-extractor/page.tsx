@@ -44,32 +44,31 @@ const KeywordExtractorPage = () => {
     try {
       const response = await fetch('/api/extract', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ text }), // Send the text
+        headers: { 'Content-Type': 'application/json' },
+        // 1. Send the text AND the postId
+        body: JSON.stringify({ text, postId: sourcePostId }),
       });
 
       if (!response.ok) {
         throw new Error('API request failed');
       }
 
+      // 2. The data is now { mainKeywords: [{text, status}, ...], ... }
       const data = await response.json();
 
-      // Create the 'stats' object
       const wordCount = text.trim().split(/\s+/).length;
       const keywordsFound =
         (data.mainKeywords?.length || 0) + (data.subKeywords?.length || 0);
 
-      // Set the final results to update the UI
+      // 3. Set the results directly (we add dummy relevance for the tag)
       setResults({
-        mainKeywords: (data.mainKeywords || []).map((kw: string) => ({
-          text: kw,
-          relevance: 0.9, // Add dummy relevance
+        mainKeywords: (data.mainKeywords || []).map((kw: any) => ({
+          ...kw,
+          relevance: 0.9,
         })),
-        subKeywords: (data.subKeywords || []).map((kw: string) => ({
-          text: kw,
-          relevance: 0.7, // Add dummy relevance
+        subKeywords: (data.subKeywords || []).map((kw: any) => ({
+          ...kw,
+          relevance: 0.7,
         })),
         stats: {
           wordCount,
