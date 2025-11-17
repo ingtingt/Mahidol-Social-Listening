@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "load-data": "ts-node --compiler-options \"{\\\"module\\\":\\\"CommonJS\\\"}\" scripts/loadAndMergeData.ts",
-    "seed": "ts-node --compiler-options \"{\\\"module\\\":\\\"CommonJS\\\"}\" prisma/seed.ts"
+    "seed": "ts-node --compiler-options \"{\\\"module\\\":\\\"CommonJS\\\"}\" prisma/seed.ts",
+    "link-keywords": "ts-node --compiler-options \"{\\\"module\\\":\\\"CommonJS\\\"}\" scripts/linkKeywords.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

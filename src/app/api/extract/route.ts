@@ -21,7 +21,7 @@ export async function POST(request: Request) {
 
     const model = genAI.getGenerativeModel({
       // --- THIS IS THE FIX ---
-      model: 'gemini-2.5-flash', // Use the stable 'gemini-pro' model
+      model: 'gemini-2.5-flash-lite', // Use the stable 'gemini-pro' model
       // ----------------------
       generationConfig: {
         responseMimeType: 'application/json',

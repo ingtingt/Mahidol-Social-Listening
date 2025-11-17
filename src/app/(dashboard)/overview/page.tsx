@@ -31,6 +31,7 @@ import type {
   Author,
 } from '@prisma/client';
 import type { ExtractorResults } from '@/data/mockData';
+import { useRouter } from 'next/navigation';
 
 type PostWithRelations = PostType & {
   keywords: Keyword[];
@@ -90,6 +91,7 @@ const Overviewpage = () => {
   const [categoryChartConfig, setCategoryChartConfig] = useState<ChartConfig>(
     {}
   );
+  const router = useRouter();
 
   // State for the "Add Keyword" modal
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -146,10 +148,12 @@ const Overviewpage = () => {
 
   // --- Functions for Keyword Extraction Modal ---
   const handleExtractKeywords = (post: PostType) => {
-    sessionStorage.setItem('textToExtract', post.content);
-    // You would use next/navigation for this
-    // router.push('/keyword-extractor');
-    console.log('Navigating to extractor with post:', post.id);
+    const dataToStore = {
+      content: post.content,
+      postId: post.id,
+    };
+    sessionStorage.setItem('textToExtract', JSON.stringify(dataToStore));
+    router.push('/keyword-extractor');
   };
 
   const handleOpenAddModal = (
@@ -259,10 +263,7 @@ const Overviewpage = () => {
 
         {/* Second Row: Top Messages */}
         <div>
-          <TopMessagesCard
-            messages={posts} // Pass the full, real list of posts
-            onExtract={handleExtractKeywords} // Pass the handler function
-          />
+          <TopMessagesCard messages={posts} onExtract={handleExtractKeywords} />
         </div>
       </div>
       {/* --- END NEW LAYOUT --- */}

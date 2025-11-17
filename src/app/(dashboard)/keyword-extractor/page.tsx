@@ -9,28 +9,30 @@ import AddKeywordModal from '@/components/AddKeywordModal';
 import { Keyword } from '@prisma/client';
 
 const KeywordExtractorPage = () => {
-  // State for the text area
   const [text, setText] = useState('');
-
-  // State for the AI results
   const [results, setResults] = useState<ExtractorResults | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-
-  // State for the "Add Keyword" modal
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [keywordToAdd, setKeywordToAdd] = useState<Partial<Keyword> | null>(
     null
   );
+  const [sourcePostId, setSourcePostId] = useState<string | null>(null);
 
   // 2. Check for text from session storage when the page loads
   useEffect(() => {
-    const textToLoad = sessionStorage.getItem('textToExtract');
-    if (textToLoad) {
-      setText(textToLoad);
-      // Clear storage so it doesn't load again on refresh
+    const item = sessionStorage.getItem('textToExtract');
+    if (item) {
+      try {
+        const { content, postId } = JSON.parse(item); // Get the content AND postId
+        if (content) setText(content);
+        if (postId) setSourcePostId(postId); // <-- Store the postId
+      } catch (e) {
+        // Fallback for old simple string
+        setText(item);
+      }
       sessionStorage.removeItem('textToExtract');
     }
-  }, []); // The empty array [] means this runs only once
+  }, []);
 
   // 3. This function calls your Gemini API
   const handleExtract = async () => {
@@ -96,15 +98,16 @@ const KeywordExtractorPage = () => {
   // 5. This function is passed to the modal to save the new keyword
   const handleSaveFromModal = async (
     keywordData: { name: string; type: string },
-    id?: number // id will be undefined here, so it will only "ADD"
+    id?: number
   ) => {
     try {
       const response = await fetch('/api/keywords', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: keywordData.name, // Use the (potentially edited) name from the modal
-          type: keywordData.type, // Use the selected type from the modal
+          name: keywordData.name,
+          type: keywordData.type,
+          postId: sourcePostId, // 4. <-- Pass the stored postId to your API
         }),
       });
 

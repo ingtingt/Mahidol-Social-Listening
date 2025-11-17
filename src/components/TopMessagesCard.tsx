@@ -1,19 +1,19 @@
 'use client';
 
-// 1. Import useState and useMemo for sorting
+// 1. Import all necessary hooks and components
 import React, { useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   MoreHorizontal,
   Wand2,
   ExternalLink,
   TrendingUp, // Icon for Reactions
   MessageCircle, // Icon for Comments
-  Share, // Icon for Shares
+  Share2, // Icon for Shares
   Facebook,
   Twitter,
   Instagram,
 } from 'lucide-react';
-// 2. Import Dialog components
 import {
   Dialog,
   DialogContent,
@@ -22,24 +22,20 @@ import {
   DialogDescription,
   DialogTrigger,
 } from '@/components/ui/dialog';
-// 3. Import Prisma types
+// 2. Import Prisma types
 import type { Post as PostType, Comment, Author } from '@prisma/client';
-// 4. Import mock data *only* for the calendar days
-import type { CalendarDay } from '@/data/mockData';
-import { calendarDaysData } from '@/data/mockData'; // Import the actual data for the calendar
-import { useRouter } from 'next/navigation';
 
-// 5. Define the type for a Post including its relations
+// 3. Define the type for a Post including its relations
 type PostWithRelations = PostType & {
   comments: (Comment & { author: Author | null })[];
 };
 
 type FilterKey = 'reactionsCount' | 'commentsCount' | 'sharesCount';
 
-// 6. Update the props to accept the full list of posts
+// 4. Update the props to accept the full list of posts
 type CardProps = {
   messages: PostWithRelations[]; // This component now needs the full post object with comments
-  onExtract: (post: PostType) => void;
+  onExtract: (post: PostType) => void; // This is for the POST extract button
 };
 
 // Map platform names from your database to icons
@@ -75,29 +71,43 @@ const FilterButton = ({
 
 const TopMessagesCard = ({ messages, onExtract }: CardProps) => {
   const [filter, setFilter] = useState<FilterKey>('reactionsCount');
+
+  // State for expandable content
   const [expandedRows, setExpandedRows] = useState<string[]>([]);
+
+  // State for the comments modal
   const [selectedPost, setSelectedPost] = useState<PostWithRelations | null>(
     null
   );
-  const router = useRouter();
 
+  const router = useRouter(); // Initialize the router
+
+  // Sort and filter the messages
   const top5Messages = useMemo(() => {
     return [...messages].sort((a, b) => b[filter] - a[filter]).slice(0, 5);
   }, [messages, filter]);
 
+  // Function to toggle expanding text
   const toggleRow = (id: string) => {
-    setExpandedRows((prev) =>
-      prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id]
+    setExpandedRows(
+      (prev) =>
+        prev.includes(id)
+          ? prev.filter((rowId) => rowId !== id) // Collapse
+          : [...prev, id] // Expand
     );
   };
 
-  // This function sends text from a COMMENT to the Keyword Extractor page
+  // Function to handle extracting text from a COMMENT
   const handleCommentExtractClick = (content: string) => {
-    sessionStorage.setItem('textToExtract', content);
+    sessionStorage.setItem(
+      'textToExtract',
+      JSON.stringify({ content: content, postId: null })
+    );
     router.push('/keyword-extractor');
   };
 
   return (
+    // Wrap the component in the Dialog provider
     <Dialog
       onOpenChange={(isOpen) => {
         if (!isOpen) setSelectedPost(null);
@@ -109,20 +119,20 @@ const TopMessagesCard = ({ messages, onExtract }: CardProps) => {
         {/* Filter buttons */}
         <div className="flex space-x-2 my-4">
           <FilterButton
-            text="Top Reactions"
+            text="Reactions"
             icon={TrendingUp}
             isActive={filter === 'reactionsCount'}
             onClick={() => setFilter('reactionsCount')}
           />
           <FilterButton
-            text="Top Comments"
+            text="Comments"
             icon={MessageCircle}
             isActive={filter === 'commentsCount'}
             onClick={() => setFilter('commentsCount')}
           />
           <FilterButton
-            text="Top Shares"
-            icon={Share}
+            text="Shares"
+            icon={Share2}
             isActive={filter === 'sharesCount'}
             onClick={() => setFilter('sharesCount')}
           />
@@ -156,7 +166,7 @@ const TopMessagesCard = ({ messages, onExtract }: CardProps) => {
                 {/* Post Content */}
                 <div className="flex-1 bg-gray-50 p-4 rounded-lg">
                   <div className="flex justify-between items-start mb-2">
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 flex-wrap">
                       <span className="font-semibold text-sm flex items-center">
                         <PlatformIcon className="w-4 h-4 mr-2" />
                         {item.platform}
@@ -177,7 +187,7 @@ const TopMessagesCard = ({ messages, onExtract }: CardProps) => {
                         className="flex items-center gap-1 text-xs text-gray-500"
                         title="Shares"
                       >
-                        <Share size={14} /> {item.sharesCount}
+                        <Share2 size={14} /> {item.sharesCount}
                       </span>
                     </div>
 
@@ -248,7 +258,7 @@ const TopMessagesCard = ({ messages, onExtract }: CardProps) => {
                 <p className="text-gray-700">{comment.message}</p>
                 <div className="flex items-center gap-4 mt-2">
                   <button
-                    onClick={() => handleCommentExtractClick(comment.message)}
+                    onClick={() => handleCommentExtractClick(comment.message)} // Use the correct function
                     className="flex items-center text-xs text-purple-600 hover:underline"
                   >
                     <Wand2 size={14} className="mr-1" /> Extract Keywords

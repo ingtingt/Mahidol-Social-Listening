@@ -39,6 +39,7 @@ const DatabaseTable = () => {
     null
   );
 
+  // Initialize the router
   const router = useRouter();
 
   // Fetch all posts from your API on component load
@@ -68,8 +69,24 @@ const DatabaseTable = () => {
   };
 
   // Function to handle clicking the "Extract" button
-  const handleExtractClick = (content: string) => {
-    sessionStorage.setItem('textToExtract', content);
+  const handleExtractClick = (content: string, postId: string) => {
+    const dataToStore = {
+      content: content,
+      postId: postId,
+    };
+    // Save the post's content and ID to the browser's session
+    sessionStorage.setItem('textToExtract', JSON.stringify(dataToStore));
+    // Navigate the user to the extractor page
+    router.push('/keyword-extractor');
+  };
+
+  // Separate function for comment extraction (which doesn't need a postId link)
+  const handleCommentExtractClick = (content: string) => {
+    const dataToStore = {
+      content: content,
+      postId: null, // Or you could pass selectedPost.id if you want to link it
+    };
+    sessionStorage.setItem('textToExtract', JSON.stringify(dataToStore));
     router.push('/keyword-extractor');
   };
 
@@ -118,13 +135,15 @@ const DatabaseTable = () => {
             <tbody className="divide-y divide-gray-200">
               {data.map((post) => {
                 const isExpanded = expandedRows.includes(post.id);
+
+                // Get the category name and color
                 const categoryName = post.category || 'Uncategorized';
                 const categoryColor =
                   colorMap.get(categoryName) || defaultColor;
 
                 return (
                   <tr key={post.id}>
-                    {/* Category Cell */}
+                    {/* Category Cell with Color */}
                     <td className="p-4 align-top w-1/6">
                       <div className="flex items-center">
                         <span
@@ -176,7 +195,9 @@ const DatabaseTable = () => {
                     {/* Extract Keywords Cell */}
                     <td className="p-4 align-top w-1/12">
                       <button
-                        onClick={() => handleExtractClick(post.content)}
+                        onClick={() =>
+                          handleExtractClick(post.content, post.id)
+                        }
                         className="p-2 text-purple-600 hover:bg-purple-100 rounded-full"
                         title="Extract Keywords"
                       >
@@ -211,16 +232,15 @@ const DatabaseTable = () => {
                 </p>
                 <p className="text-gray-700">{comment.message}</p>
 
-                {/* --- 4. THIS IS THE NEW BUTTON --- */}
+                {/* --- Button to extract from comment --- */}
                 <div className="flex items-center gap-4 mt-2">
                   <button
-                    onClick={() => handleExtractClick(comment.message)}
+                    onClick={() => handleCommentExtractClick(comment.message)}
                     className="flex items-center text-xs text-purple-600 hover:underline"
                   >
                     <Wand2 size={14} className="mr-1" /> Extract Keywords
                   </button>
                 </div>
-                {/* --- END NEW BUTTON --- */}
               </div>
             ))
           ) : (

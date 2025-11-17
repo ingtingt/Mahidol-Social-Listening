@@ -30,7 +30,7 @@ const ResultsPanel = ({
               <Info size={18} className="text-gray-400 cursor-pointer" />
             </TooltipTrigger>
             <TooltipContent>
-              <p>by gemini-2.5-flash</p>
+              <p>by gemini-2.5-flash-lite</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
