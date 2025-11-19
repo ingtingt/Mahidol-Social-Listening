@@ -9,8 +9,8 @@ const SYSTEM_PROMPT = `You are an AI assistant specialized in text analysis. You
 
 Example:
 {
-  "mainKeywords": ["Mahidol University", "Admission"],
-  "subKeywords": ["Salaya campus", "application requirements"]
+  "mainKeywords": ["Mahidol University", "Admission", "มหาวิทยาลัย"],
+  "subKeywords": ["Salaya campus", "application requirements", "กองเทคโนโลยีสารสนเทศ"]
 }`;
 
 // Define the type for the AI's keyword response

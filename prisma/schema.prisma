@@ -68,6 +68,7 @@ model Comment {
   replyCount   Int
   
   // The category of the comment, analyzed by your app
+  sentiment   String?   // e.g. "Positive", "Negative"
   category    String?   // "Positive", "Neutral", "Negative"
   
   // Relation: Each comment belongs to one post

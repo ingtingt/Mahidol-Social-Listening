@@ -1,6 +1,5 @@
 'use client';
 
-// 1. Import all necessary hooks and components
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Post, Comment, Author } from '@prisma/client';
@@ -13,18 +12,14 @@ import {
   DialogDescription,
   DialogTrigger,
 } from '@/components/ui/dialog';
-
-// 2. Import your category color data
 import { categoryDetails } from '@/data/mockData';
 
-// 3. Create a color lookup map
 const colorMap = new Map<string, string>();
 for (const category of categoryDetails) {
   colorMap.set(category.name, category.color);
 }
-const defaultColor = '#9ca3af'; // gray-400 for 'Uncategorized'
+const defaultColor = '#9ca3af';
 
-// Define the type for a Post including its relations
 type PostWithRelations = Post & {
   comments: (Comment & {
     author: Author | null;
@@ -39,10 +34,8 @@ const DatabaseTable = () => {
     null
   );
 
-  // Initialize the router
   const router = useRouter();
 
-  // Fetch all posts from your API on component load
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -58,33 +51,23 @@ const DatabaseTable = () => {
     fetchData();
   }, []);
 
-  // Function to toggle a row's expanded state
   const toggleRow = (id: string) => {
-    setExpandedRows(
-      (prev) =>
-        prev.includes(id)
-          ? prev.filter((rowId) => rowId !== id) // Collapse
-          : [...prev, id] // Expand
+    setExpandedRows((prev) =>
+      prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id]
     );
   };
 
-  // Function to handle clicking the "Extract" button
   const handleExtractClick = (content: string, postId: string) => {
-    const dataToStore = {
-      content: content,
-      postId: postId,
-    };
-    // Save the post's content and ID to the browser's session
+    const dataToStore = { content, postId };
     sessionStorage.setItem('textToExtract', JSON.stringify(dataToStore));
-    // Navigate the user to the extractor page
     router.push('/keyword-extractor');
   };
 
-  // Separate function for comment extraction (which doesn't need a postId link)
-  const handleCommentExtractClick = (content: string) => {
+  // --- 1. UPDATED FUNCTION: Accepts postId ---
+  const handleCommentExtractClick = (content: string, postId: string) => {
     const dataToStore = {
       content: content,
-      postId: null, // Or you could pass selectedPost.id if you want to link it
+      postId: postId, // Now we pass the link!
     };
     sessionStorage.setItem('textToExtract', JSON.stringify(dataToStore));
     router.push('/keyword-extractor');
@@ -135,15 +118,12 @@ const DatabaseTable = () => {
             <tbody className="divide-y divide-gray-200">
               {data.map((post) => {
                 const isExpanded = expandedRows.includes(post.id);
-
-                // Get the category name and color
                 const categoryName = post.category || 'Uncategorized';
                 const categoryColor =
                   colorMap.get(categoryName) || defaultColor;
 
                 return (
                   <tr key={post.id}>
-                    {/* Category Cell with Color */}
                     <td className="p-4 align-top w-1/6">
                       <div className="flex items-center">
                         <span
@@ -153,8 +133,6 @@ const DatabaseTable = () => {
                         <span className="text-sm truncate">{categoryName}</span>
                       </div>
                     </td>
-
-                    {/* Expandable Content Cell */}
                     <td className="p-4 align-top w-3/6">
                       <p
                         onClick={() => toggleRow(post.id)}
@@ -165,8 +143,6 @@ const DatabaseTable = () => {
                         {post.content}
                       </p>
                     </td>
-
-                    {/* Comments Modal Trigger Cell */}
                     <td className="p-4 align-top w-1/6">
                       <DialogTrigger asChild>
                         <button
@@ -178,8 +154,6 @@ const DatabaseTable = () => {
                         </button>
                       </DialogTrigger>
                     </td>
-
-                    {/* Permalink Cell */}
                     <td className="p-4 align-top w-1/6">
                       <a
                         href={post.permalink}
@@ -187,12 +161,9 @@ const DatabaseTable = () => {
                         rel="noopener noreferrer"
                         className="flex items-center text-blue-500 hover:text-blue-700 hover:underline"
                       >
-                        View Post
-                        <ExternalLink className="w-3 h-3 ml-1" />
+                        View Post <ExternalLink className="w-3 h-3 ml-1" />
                       </a>
                     </td>
-
-                    {/* Extract Keywords Cell */}
                     <td className="p-4 align-top w-1/12">
                       <button
                         onClick={() =>
@@ -212,7 +183,6 @@ const DatabaseTable = () => {
         </div>
       </div>
 
-      {/* --- Comments Modal --- */}
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Comments</DialogTitle>
@@ -231,11 +201,12 @@ const DatabaseTable = () => {
                   {comment.author?.name || 'Anonymous'}
                 </p>
                 <p className="text-gray-700">{comment.message}</p>
-
-                {/* --- Button to extract from comment --- */}
                 <div className="flex items-center gap-4 mt-2">
+                  {/* --- 2. UPDATED BUTTON: Pass comment.postId --- */}
                   <button
-                    onClick={() => handleCommentExtractClick(comment.message)}
+                    onClick={() =>
+                      handleCommentExtractClick(comment.message, comment.postId)
+                    }
                     className="flex items-center text-xs text-purple-600 hover:underline"
                   >
                     <Wand2 size={14} className="mr-1" /> Extract Keywords

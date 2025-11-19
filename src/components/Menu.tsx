@@ -35,7 +35,7 @@ import {
 const navItems = [
   { name: 'Overview', icon: LayoutGrid, path: '/overview' },
   { name: 'Keyword Tracker', icon: Key, path: '/keyword-tracker' },
-  { name: 'Sentiment Trends', icon: TrendingUp, path: '/sentiment-trends' },
+  { name: 'Comment Analysis', icon: TrendingUp, path: '/sentiment-trends' },
   { name: 'Keyword Extractor', icon: TextSearch, path: '/keyword-extractor' },
   {
     name: 'Data Collection',
