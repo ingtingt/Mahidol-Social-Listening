@@ -1,25 +1,15 @@
 import { PrismaClient } from '@prisma/client';
 import * as fs from 'fs';
 import * as path from 'path';
-import Papa from 'papaparse'; // Make sure you've run: npm install papaparse @types/papaparse
+import Papa from 'papaparse';
 
 const prisma = new PrismaClient();
 
-// Type for the (bad) CSV row
+// ... (Types are the same) ...
 type CsvRow = {
   created_time: string;
   'Predicted Sentiment': string;
-  // Add other CSV columns if needed, but these are the minimum
-  post_id: string;
-  content: string;
-  permalink: string;
-  reactions_count: string;
-  shares_count: string;
-  comments_count: string;
-  comments: string;
 };
-
-// Types for the (good) JSON data
 type JsonPost = {
   post_id: string;
   content: string;
@@ -30,23 +20,31 @@ type JsonPost = {
   comments_count: number;
   comments: JsonComment[];
 };
-
 type JsonComment = {
   comment_id: string;
-  from: {
-    name?: string;
-    id?: string;
-  };
+  from: { name?: string; id?: string };
   message: string;
   created_time: string;
   like_count: number;
   reply_count: number;
 };
 
+// --- HELPER TO GENERATE RANDOM SENTIMENT ---
+function getRandomSentiment() {
+  const sentiments = ['Positive', 'Neutral', 'Negative'];
+  // Weight it slightly towards Neutral/Positive for realism
+  const weights = [0.3, 0.5, 0.2];
+  const random = Math.random();
+
+  if (random < weights[0]) return sentiments[0];
+  if (random < weights[0] + weights[1]) return sentiments[1];
+  return sentiments[2];
+}
+
 async function main() {
   console.log('Starting data merge and ingestion script...');
 
-  // 1. Read and parse the CSV file to create a category lookup map
+  // 1. Read and parse the CSV file
   const csvFilePath = path.join(
     process.cwd(),
     'merged_facebook_sentiment_results.csv'
@@ -60,18 +58,12 @@ async function main() {
   const categoryMap = new Map<string, string>();
   for (const row of parseResult.data) {
     if (row.created_time && row['Predicted Sentiment']) {
-      // THE FIX IS HERE:
-      // This converts the CSV time string to match the JSON time string
-      // CSV:  "2025-11-03 12:51:15+00:00"
-      // JSON: "2025-11-03T12:51:15+0000"
       const jsonStyleTime = row.created_time
-        .replace(' ', 'T') // Replaces the space with a 'T'
-        .replace(/:(\d\d)$/, '$1'); // Removes the last colon (e.g., +00:00 -> +0000)
-
+        .replace(' ', 'T')
+        .replace(/:(\d\d)$/, '$1');
       categoryMap.set(jsonStyleTime, row['Predicted Sentiment']);
     }
   }
-  console.log(`Created category lookup map with ${categoryMap.size} entries.`);
 
   // 2. Read the JSON file
   const jsonFilePath = path.join(process.cwd(), 'facebook_data.json');
@@ -80,26 +72,16 @@ async function main() {
 
   console.log(`Found ${jsonData.length} JSON posts to process.`);
 
-  // 3. Loop through JSON data, merge with category, and insert
+  // 3. Loop through JSON data and insert
   for (const post of jsonData) {
-    if (!post.content) {
-      console.log(`Skipping post ${post.post_id} due to empty content.`);
-      continue;
-    }
+    if (!post.content) continue;
 
-    // Find the category from our map using the JSON time string
-    const category = categoryMap.get(post.created_time) || 'Uncategorized'; // Default category if not found
-
-    if (category === 'Uncategorized') {
-      console.warn(
-        `Warning: Could not find category for post ${post.post_id}, defaulting to 'Uncategorized'.`
-      );
-    }
+    const category = categoryMap.get(post.created_time) || 'Uncategorized';
 
     try {
       await prisma.post.create({
         data: {
-          id: post.post_id, // Use the *correct* ID from the JSON
+          id: post.post_id,
           platform: 'Facebook',
           content: post.content,
           createdAt: new Date(post.created_time),
@@ -107,9 +89,12 @@ async function main() {
           reactionsCount: post.reactions_count || 0,
           sharesCount: post.shares_count || 0,
           commentsCount: post.comments_count || 0,
-          category: category, // Use the matched category
+          category: category,
 
-          // Create all comments and authors from the JSON
+          // --- ADD FAKE SENTIMENT ---
+          sentiment: getRandomSentiment(),
+          // --------------------------
+
           comments: {
             create: post.comments.map((comment: JsonComment) => ({
               id: comment.comment_id,
@@ -117,6 +102,11 @@ async function main() {
               createdAt: new Date(comment.created_time),
               likeCount: comment.like_count || 0,
               replyCount: comment.reply_count || 0,
+
+              // --- ADD FAKE SENTIMENT TO COMMENTS TOO ---
+              sentiment: getRandomSentiment(),
+              category: 'Uncategorized', // Or random category if you want
+              // ------------------------------------------
 
               author:
                 comment.from && comment.from.id
@@ -134,19 +124,14 @@ async function main() {
           },
         },
       });
-      console.log(
-        `Successfully inserted post: ${post.post_id} with category: ${category}`
-      );
+      console.log(`Inserted: ${post.post_id}`);
     } catch (e: any) {
-      if (e.code === 'P2002') {
-        console.log(`Skipping duplicate post: ${post.post_id}`);
-      } else {
-        console.error(`Failed to insert post ${post.post_id}:`, e.message);
-      }
+      if (e.code !== 'P2002')
+        console.error(`Failed: ${post.post_id}`, e.message);
     }
   }
 
-  console.log('Data merge and ingestion finished.');
+  console.log('Finished.');
 }
 
 main()

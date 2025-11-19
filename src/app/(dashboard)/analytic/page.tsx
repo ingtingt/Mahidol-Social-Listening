@@ -162,8 +162,8 @@ const PostAnalysisPage = () => {
       )}
 
       <div>
-        <p className="text-sm text-gray-500">Page / Post Analysis</p>
         <h1 className="text-3xl font-bold text-gray-800">Post Analysis</h1>
+        <p className="text-gray-500 mt-1">Analyzing categories from posts.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

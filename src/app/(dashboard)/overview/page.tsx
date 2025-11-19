@@ -9,6 +9,7 @@ import PlatformPerformance from '@/components/PlatformPerformance';
 import KeywordAnalysis from '@/components/KeywordAnalysis';
 // Import icons for the StatCards
 import { Users2, MessageSquareText, BarChart2, ThumbsUp } from 'lucide-react';
+import SentimentOverview from '@/components/SentimentOverview';
 
 // --- 1. Define Types ---
 interface AnalyticData {
@@ -29,6 +30,7 @@ interface AnalyticsResponse {
   analyticData: AnalyticData[];
   platformPerformance: PlatformData[];
   topKeywords: TopKeywordData[];
+  sentimentOverview: any[];
   summary: {
     totalMentions: number;
   };
@@ -40,6 +42,7 @@ const Overviewpage = () => {
   const [platformData, setPlatformData] = useState<PlatformData[]>([]);
   const [topKeywordsData, setTopKeywordsData] = useState<TopKeywordData[]>([]);
   const [totalMentions, setTotalMentions] = useState(0);
+  const [sentimentOverview, setSentimentOverview] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -56,6 +59,7 @@ const Overviewpage = () => {
         setPlatformData(data.platformPerformance);
         setTopKeywordsData(data.topKeywords);
         setTotalMentions(data.summary.totalMentions);
+        setSentimentOverview(data.sentimentOverview);
       } catch (error) {
         console.error('Failed to fetch analytics data:', error);
       } finally {
@@ -76,7 +80,7 @@ const Overviewpage = () => {
   }
 
   return (
-    <div className="flex flex-col gap-8 pb-12">
+    <div className="flex flex-col gap-6 pb-12">
       {/* --- NEW HEADER SECTION --- */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 p-8 text-white shadow-lg">
         <div className="relative z-10 flex justify-between items-end">
@@ -139,10 +143,7 @@ const Overviewpage = () => {
       </div>
 
       {/* --- MAIN CHARTS --- */}
-      <div className="mt-2">
-        <SentimentAreaChart data={analyticData} />
-      </div>
-
+      <div className="lg:col-span-1"></div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <PlatformPerformance data={platformData} />
         <KeywordAnalysis data={topKeywordsData} />
