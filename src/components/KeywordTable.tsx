@@ -1,6 +1,5 @@
 import { Edit, Trash2 } from 'lucide-react';
-import type { Keyword } from '@prisma/client';
-// 1. IMPORT THE SELECT COMPONENTS
+import type { Keyword as KeywordType, Prisma } from '@prisma/client';
 import {
   Select,
   SelectContent,
@@ -9,12 +8,18 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-// 2. UPDATE THE PROPS
+// Define our new Keyword type which includes the post count
+type KeywordWithCount = KeywordType & {
+  _count: { posts: number };
+};
+
+// Update the props
 type KeywordTableProps = {
-  keywords: Keyword[];
-  setKeywords: React.Dispatch<React.SetStateAction<Keyword[]>>;
+  keywords: KeywordWithCount[];
+  setKeywords: React.Dispatch<React.SetStateAction<KeywordWithCount[]>>;
   onDelete: (id: number) => void;
-  onEdit: (keyword: Keyword) => void;
+  onEdit: (keyword: KeywordWithCount) => void;
+  onViewPosts: (keyword: KeywordWithCount) => void;
   typeFilter: string;
   setTypeFilter: (value: string) => void;
 };
@@ -24,6 +29,7 @@ const KeywordTable = ({
   setKeywords,
   onDelete,
   onEdit,
+  onViewPosts,
   typeFilter,
   setTypeFilter,
 }: KeywordTableProps) => (
@@ -34,9 +40,8 @@ const KeywordTable = ({
           <th className="p-4 text-left font-semibold text-gray-600 w-2/5">
             KEYWORD
           </th>
-
-          {/* 3. REPLACE THE "TYPE" TH */}
           <th className="p-4 text-left font-semibold text-gray-600">
+            {/* --- TYPE FILTER DROPDOWN --- */}
             <Select value={typeFilter} onValueChange={setTypeFilter}>
               <SelectTrigger className="w-[120px] bg-transparent border-none p-0 font-semibold text-gray-600 focus:ring-0">
                 <SelectValue />
@@ -48,10 +53,7 @@ const KeywordTable = ({
               </SelectContent>
             </Select>
           </th>
-
-          <th className="p-4 text-left font-semibold text-gray-600">
-            DATE ADDED
-          </th>
+          <th className="p-4 text-left font-semibold text-gray-600">POSTS</th>
           <th className="p-4 text-left font-semibold text-gray-600">ACTION</th>
         </tr>
       </thead>
@@ -60,9 +62,18 @@ const KeywordTable = ({
           <tr key={kw.id} className="border-t border-gray-200">
             <td className="p-4 font-medium">{kw.name}</td>
             <td className="p-4 text-gray-600">{kw.type}</td>
+
+            {/* --- CLICKABLE POST COUNT --- */}
             <td className="p-4 text-gray-600">
-              {new Date(kw.createdAt).toLocaleDateString()}
+              <button
+                onClick={() => onViewPosts(kw)}
+                disabled={kw._count.posts === 0}
+                className="font-medium text-blue-600 hover:underline disabled:text-gray-500 disabled:no-underline"
+              >
+                {kw._count.posts}
+              </button>
             </td>
+
             <td className="p-4">
               <div className="flex space-x-2">
                 <button

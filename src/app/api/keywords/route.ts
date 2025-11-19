@@ -10,6 +10,11 @@ export async function GET() {
       orderBy: {
         createdAt: 'desc', // Show newest first
       },
+      include: {
+        _count: {
+          select: { posts: true }, // Select the count of related posts
+        },
+      },
     });
     return NextResponse.json(keywords);
   } catch (error) {
