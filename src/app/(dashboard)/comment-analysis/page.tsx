@@ -107,7 +107,6 @@ const SentimentTrendsPage = () => {
     <div className="flex flex-col gap-8 pb-12">
       {/* Header */}
       <div>
-        <p className="text-sm text-gray-500">Page / Sentiment Trends</p>
         <h1 className="text-3xl font-bold text-gray-800">Comment Analysis</h1>
         <p className="text-gray-500 mt-1">
           Analyzing sentiment and categories from user comments.

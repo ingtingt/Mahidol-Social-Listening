@@ -34,8 +34,9 @@ import {
 
 const navItems = [
   { name: 'Overview', icon: LayoutGrid, path: '/overview' },
+  { name: 'Post Analysis', icon: FileText, path: '/analytic' },
+  { name: 'Comment Analysis', icon: TrendingUp, path: '/comment-analysis' },
   { name: 'Keyword Tracker', icon: Key, path: '/keyword-tracker' },
-  { name: 'Comment Analysis', icon: TrendingUp, path: '/sentiment-trends' },
   { name: 'Keyword Extractor', icon: TextSearch, path: '/keyword-extractor' },
   {
     name: 'Data Collection',
@@ -43,7 +44,6 @@ const navItems = [
     path: '/data-collection',
   },
   { name: 'Model Evaluation', icon: Vote, path: '/model-evaluation' },
-  { name: 'Analytic', icon: FileText, path: '/analytic' },
   { name: 'Settings', icon: Settings, path: '/settings' },
 ];
 

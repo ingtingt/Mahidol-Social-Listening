@@ -5,7 +5,6 @@ type StatCardProps = {
   title: string;
   value: string;
   Icon: LucideIcon;
-  // 1. Make these props optional by adding '?'
   change?: number;
   changeText?: string;
 };
@@ -17,37 +16,21 @@ const StatCard = ({
   changeText,
   Icon,
 }: StatCardProps) => {
-  // 2. Check if a change value was provided
   const isPositive = change ? change >= 0 : undefined;
 
   return (
-    <div className="flex-1 bg-white p-6 rounded-lg shadow-sm flex flex-col gap-4">
-      {/* Top Section: Title and Icon */}
-      <div className="flex items-center justify-between">
-        <p className="text-lg text-gray-800">{title}</p>
-        <div className="bg-blue-50 text-blue-500 p-2 rounded-lg">
+    <div className="flex-1 bg-white p-6 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-1 cursor-default group">
+      <div className="flex items-center justify-between mb-4">
+        <div className="p-2 bg-purple-50 text-purple-600 rounded-lg group-hover:bg-purple-600 group-hover:text-white transition-colors">
           <Icon className="w-5 h-5" />
         </div>
-      </div>
-
-      {/* Middle Section: Main Value */}
-      <div>
-        <h2 className="text-3xl font-bold">{value}</h2>
-      </div>
-
-      {/* 3. Conditionally render the change indicator */}
-      {/* This section will only appear if 'change' is provided */}
-      {change !== undefined && changeText && (
-        <div className="flex items-center gap-2 text-xs">
+        {change !== undefined && (
           <div
-            className={`
-              flex items-center gap-1 px-2 py-1 rounded-full
-              ${
-                isPositive
-                  ? 'bg-emerald-100 text-emerald-600'
-                  : 'bg-red-100 text-red-600'
-              }
-            `}
+            className={`flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full ${
+              isPositive
+                ? 'bg-green-50 text-green-700'
+                : 'bg-red-50 text-red-700'
+            }`}
           >
             {isPositive ? (
               <ArrowUp className="w-3 h-3" />
@@ -56,9 +39,17 @@ const StatCard = ({
             )}
             <span>{Math.abs(change)}%</span>
           </div>
-          <span className="text-gray-500">{changeText}</span>
-        </div>
-      )}
+        )}
+      </div>
+
+      <div>
+        <p className="text-sm font-medium text-gray-500 mb-1">{title}</p>
+        <h2 className="text-3xl font-bold text-gray-800 tracking-tight">
+          {value}
+        </h2>
+      </div>
+
+      {changeText && <p className="text-xs text-gray-400 mt-2">{changeText}</p>}
     </div>
   );
 };

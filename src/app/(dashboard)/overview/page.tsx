@@ -1,272 +1,152 @@
-'use client'; // This page now fetches data, so it must be a client component
+'use client';
 
 import React, { useState, useEffect } from 'react';
+import { Download, SlidersHorizontal } from 'lucide-react';
+// Import the redesigned StatCard (make sure you updated the component file!)
 import StatCard from '@/components/StatCard';
-import {
-  Users2,
-  MessageSquareText,
-  MessageCircleMore,
-  BarChart2,
-} from 'lucide-react';
-import { ChartConfig } from '@/components/ui/chart'; // Import the ChartConfig type
+import SentimentAreaChart from '@/components/SentimentAreaChart';
+import PlatformPerformance from '@/components/PlatformPerformance';
+import KeywordAnalysis from '@/components/KeywordAnalysis';
+// Import icons for the StatCards
+import { Users2, MessageSquareText, BarChart2, ThumbsUp } from 'lucide-react';
 
-// Import all your components
-import CategoryBreakdown from '@/components/CategoryBreakdown';
-import TopMessagesCard from '@/components/TopMessagesCard';
-// import SocialMediaBreakdownCard from '@/components/SocialMediaBreakdownCard'; // Removed
-import PlatformInsightsCard from '@/components/PlatformInsightsCard';
-import AddKeywordModal from '@/components/AddKeywordModal';
+// --- 1. Define Types ---
+interface AnalyticData {
+  date: string;
+  [key: string]: any;
+}
+interface PlatformData {
+  name: string;
+  mentions: number;
+}
+interface TopKeywordData {
+  name: string;
+  mentions: number;
+}
 
-// Import types and mock data
-import {
-  platformInsightsData,
-  socialMediaCardData, // Removed
-  // calendarDaysData, // No longer needed for TopMessagesCard
-  categoryDetails, // We NEED this for colors/labels
-} from '@/data/mockData';
-import type {
-  Post as PostType,
-  Keyword,
-  Comment,
-  Author,
-} from '@prisma/client';
-import type { ExtractorResults } from '@/data/mockData';
-import { useRouter } from 'next/navigation';
-
-type PostWithRelations = PostType & {
-  keywords: Keyword[];
-  comments: (Comment & { author: Author | null })[];
-};
-
-const processCategoryData = (posts: PostWithRelations[]) => {
-  const categoryCounts: { [key: string]: number } = {};
-
-  // 1. Count all categories from the real data
-  for (const post of posts) {
-    const category = post.category || 'Uncategorized';
-    categoryCounts[category] = (categoryCounts[category] || 0) + 1;
-  }
-
-  // Create a lookup map for colors from mockData
-  const colorMap = new Map<string, string>();
-  for (const detail of categoryDetails) {
-    colorMap.set(detail.name, detail.color);
-  }
-  const defaultColor = '#9ca3af'; // gray-400 for any unknown
-
-  // 2. Build chartData *from the counts*
-  const chartData = Object.entries(categoryCounts).map(([name, count]) => ({
-    name: name,
-    count: count,
-    fill: colorMap.get(name) || defaultColor, // Pass the direct hex code
-  }));
-
-  // 3. Build chartConfig *from the counts*
-  const chartConfig: ChartConfig = {
-    count: { label: 'Posts' },
-    ...Object.fromEntries(
-      Object.keys(categoryCounts).map((name) => [
-        name.toLowerCase().replace(/ /g, '-'), // key
-        {
-          label: name,
-          color: colorMap.get(name) || defaultColor, // Look up the color
-        },
-      ])
-    ),
+// --- 2. Define the API Response Type ---
+interface AnalyticsResponse {
+  analyticData: AnalyticData[];
+  platformPerformance: PlatformData[];
+  topKeywords: TopKeywordData[];
+  summary: {
+    totalMentions: number;
   };
-
-  return { chartData, chartConfig };
-};
-// --- End Helper Function ---
+}
 
 const Overviewpage = () => {
-  const [posts, setPosts] = useState<PostWithRelations[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isExtracting, setIsExtracting] = useState(false);
-  const [totalPosts, setTotalPosts] = useState(0);
-  const [totalComments, setTotalComments] = useState(0);
-  const [mainKeywordMentions, setMainKeywordMentions] = useState(0);
-  const [subKeywordMentions, setSubKeywordMentions] = useState(0);
-  const [categoryChartData, setCategoryChartData] = useState<any[]>([]);
-  const [categoryChartConfig, setCategoryChartConfig] = useState<ChartConfig>(
-    {}
-  );
-  const router = useRouter();
-
-  // State for the "Add Keyword" modal
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [keywordToAdd, setKeywordToAdd] = useState<Partial<Keyword> | null>(
-    null
-  );
+  const [analyticData, setAnalyticData] = useState<AnalyticData[]>([]);
+  const [platformData, setPlatformData] = useState<PlatformData[]>([]);
+  const [topKeywordsData, setTopKeywordsData] = useState<TopKeywordData[]>([]);
+  const [totalMentions, setTotalMentions] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('/api/posts');
-        const allPosts: PostWithRelations[] = await response.json();
+        const response = await fetch('/api/analytics');
 
-        setPosts(allPosts);
-
-        // --- 4. CALCULATE STATS ---
-        let commentsCount = 0;
-        let mainKwCount = 0;
-        let subKwCount = 0;
-
-        for (const post of allPosts) {
-          // Sum total comments
-          commentsCount += post.commentsCount;
-
-          // Count keyword mentions by type
-          for (const keyword of post.keywords) {
-            if (keyword.type === 'Main') {
-              mainKwCount++;
-            } else if (keyword.type === 'Sub') {
-              subKwCount++;
-            }
-          }
+        if (!response.ok) {
+          throw new Error('Failed to fetch analytics data');
         }
 
-        // Set all stats
-        setTotalPosts(allPosts.length);
-        setTotalComments(commentsCount);
-        setMainKeywordMentions(mainKwCount);
-        setSubKeywordMentions(subKwCount);
-        // --- END CALCULATION ---
+        const data: AnalyticsResponse = await response.json();
 
-        const { chartData, chartConfig } = processCategoryData(allPosts);
-        setCategoryChartData(chartData);
-        setCategoryChartConfig(chartConfig);
+        setAnalyticData(data.analyticData);
+        setPlatformData(data.platformPerformance);
+        setTopKeywordsData(data.topKeywords);
+        setTotalMentions(data.summary.totalMentions);
       } catch (error) {
-        console.error('Failed to fetch dashboard data:', error);
+        console.error('Failed to fetch analytics data:', error);
       } finally {
         setIsLoading(false);
       }
     };
-
     fetchData();
   }, []);
 
-  // --- Functions for Keyword Extraction Modal ---
-  const handleExtractKeywords = (post: PostType) => {
-    const dataToStore = {
-      content: post.content,
-      postId: post.id,
-    };
-    sessionStorage.setItem('textToExtract', JSON.stringify(dataToStore));
-    router.push('/keyword-extractor');
-  };
-
-  const handleOpenAddModal = (
-    keywordName: string,
-    keywordType: 'Main' | 'Sub'
-  ) => {
-    setKeywordToAdd({
-      name: keywordName,
-      type: keywordType,
-    });
-    setIsModalOpen(true);
-  };
-
-  const handleSaveFromModal = async (
-    keywordData: { name: string; type: string },
-    id?: number
-  ) => {
-    // This function calls your /api/keywords POST route
-    try {
-      const response = await fetch('/api/keywords', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(keywordData),
-      });
-
-      if (response.status === 409) {
-        alert(`Keyword "${keywordData.name}" already exists.`);
-      } else if (!response.ok) {
-        throw new Error('Failed to add keyword');
-      } else {
-        alert(`Added "${keywordData.name}" to your Keyword Tracker!`);
-        setIsModalOpen(false); // Close modal on success
-      }
-    } catch (error) {
-      console.error('Error saving keyword:', error);
-      alert(`Could not save keyword "${keywordData.name}".`);
-    }
-  };
-  // --- End Modal Functions ---
-
   if (isLoading) {
     return (
-      <div className="flex flex-col gap-8">
-        <div>
-          <p className="text-sm text-gray-500">Page / Overview</p>
-          <h1 className="text-3xl font-bold text-gray-800">Overview</h1>
-        </div>
-        <div className="text-lg text-gray-600">Loading dashboard data...</div>
+      <div className="flex h-96 items-center justify-center">
+        <p className="text-lg text-gray-500 animate-pulse">
+          Loading Overview...
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-8">
-      {/* Conditionally render the modal */}
-      {isModalOpen && (
-        <AddKeywordModal
-          onClose={() => setIsModalOpen(false)}
-          onAdd={handleSaveFromModal}
-          keywordToEdit={keywordToAdd as Keyword | null}
-        />
-      )}
+    <div className="flex flex-col gap-8 pb-12">
+      {/* --- NEW HEADER SECTION --- */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 p-8 text-white shadow-lg">
+        <div className="relative z-10 flex justify-between items-end">
+          <div>
+            <h1 className="text-3xl font-bold">Overview</h1>
+            <p className="mt-2 text-purple-100">
+              High-level insights for the last 30 days.
+            </p>
+          </div>
 
-      <div>
-        <p className="text-sm text-gray-500">Page / Overview</p>
-        <h1 className="text-3xl font-bold text-gray-800">Overview</h1>
+          {/* Header Buttons */}
+          <div className="flex items-center space-x-2">
+            <button className="flex items-center text-sm bg-white/10 text-white border border-white/20 px-3 py-2 rounded-lg hover:bg-white/20 transition-colors backdrop-blur-sm">
+              <SlidersHorizontal size={16} className="mr-2" />
+              Filters
+            </button>
+            <button className="flex items-center text-sm bg-white text-purple-600 px-3 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-md">
+              <Download size={16} className="mr-2" />
+              Export Report
+            </button>
+          </div>
+        </div>
+
+        {/* Decorative circles */}
+        <div className="absolute top-0 right-0 -mr-10 -mt-10 h-40 w-40 rounded-full bg-white/10 blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 -ml-10 -mb-10 h-40 w-40 rounded-full bg-white/10 blur-3xl"></div>
       </div>
+      {/* --- END NEW HEADER --- */}
 
+      {/* --- STAT CARDS --- */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
-          title="Total Messages"
-          value={totalPosts.toLocaleString()}
-          Icon={Users2}
+          title="Total Mentions"
+          value={totalMentions.toLocaleString()}
+          change={12.5}
+          changeText="vs last month"
+          Icon={Users2} // Pass the icon component
         />
         <StatCard
-          title="Main Keyword Messages"
-          value={mainKeywordMentions.toLocaleString()}
-          Icon={MessageSquareText}
+          title="Positive Sentiment"
+          value="68%"
+          change={5.2}
+          changeText="vs last month"
+          Icon={ThumbsUp}
         />
         <StatCard
-          title="Sub-Keyword Messages"
-          value={subKeywordMentions.toLocaleString()}
-          Icon={MessageCircleMore}
-        />
-        <StatCard
-          title="Total Comments" // This should be (Reactions + Comments + Shares)
-          value={totalComments.toLocaleString()} // Temporarily showing total comments
+          title="Top Platform"
+          value="Facebook"
+          change={-2.1}
+          changeText="vs last month"
           Icon={BarChart2}
         />
+        <StatCard
+          title="Top Keyword"
+          value={topKeywordsData.length > 0 ? topKeywordsData[0].name : 'N/A'}
+          change={18.9}
+          changeText="vs last month"
+          Icon={MessageSquareText}
+        />
       </div>
 
-      {/* --- NEW LAYOUT --- */}
-      <div className="flex flex-col gap-6">
-        {/* First Row: Category Breakdown and Platform Insights */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <CategoryBreakdown
-              chartData={categoryChartData}
-              chartConfig={categoryChartConfig}
-            />
-          </div>
-          <div className="lg:col-span-1">
-            {/* This component is still using mock data */}
-            <PlatformInsightsCard />
-          </div>
-        </div>
-
-        {/* Second Row: Top Messages */}
-        <div>
-          <TopMessagesCard messages={posts} onExtract={handleExtractKeywords} />
-        </div>
+      {/* --- MAIN CHARTS --- */}
+      <div className="mt-2">
+        <SentimentAreaChart data={analyticData} />
       </div>
-      {/* --- END NEW LAYOUT --- */}
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <PlatformPerformance data={platformData} />
+        <KeywordAnalysis data={topKeywordsData} />
+      </div>
     </div>
   );
 };
