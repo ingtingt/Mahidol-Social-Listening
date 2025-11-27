@@ -9,7 +9,8 @@
     "lint": "next lint",
     "load-data": "ts-node --compiler-options \"{\\\"module\\\":\\\"CommonJS\\\"}\" scripts/loadAndMergeData.ts",
     "seed": "ts-node --compiler-options \"{\\\"module\\\":\\\"CommonJS\\\"}\" prisma/seed.ts",
-    "link-keywords": "ts-node --compiler-options \"{\\\"module\\\":\\\"CommonJS\\\"}\" scripts/linkKeywords.ts"
+    "link-keywords": "ts-node --compiler-options \"{\\\"module\\\":\\\"CommonJS\\\"}\" scripts/linkKeywords.ts",
+    "docker:init": "npx prisma migrate deploy && npx prisma db seed && npm run load-data && npm run link-keywords"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
