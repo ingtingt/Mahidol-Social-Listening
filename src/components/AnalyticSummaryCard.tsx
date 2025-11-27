@@ -4,9 +4,15 @@ type CardProps = {
   title: string;
   value: string;
   change: number;
+  changeText?: string;
 };
 
-const AnalyticSummaryCard = ({ title, value, change }: CardProps) => (
+const AnalyticSummaryCard = ({
+  title,
+  value,
+  change,
+  changeText,
+}: CardProps) => (
   <div className="bg-white p-4 rounded-xl shadow-sm">
     <p className="text-sm text-gray-500">{title}</p>
     <p className="text-2xl font-bold mt-1">{value}</p>
@@ -20,7 +26,9 @@ const AnalyticSummaryCard = ({ title, value, change }: CardProps) => (
       ) : (
         <ArrowDown size={14} className="mr-1" />
       )}
-      <span>{Math.abs(change)}% vs last month</span>
+      <span>
+        {Math.abs(change)}% {changeText}
+      </span>
     </div>
   </div>
 );

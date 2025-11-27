@@ -8,6 +8,9 @@ import {
   MessageSquareText,
   MessageCircleMore,
   BarChart2,
+  NotebookPen,
+  FileText,
+  MessagesSquare,
 } from 'lucide-react';
 import { ChartConfig } from '@/components/ui/chart';
 
@@ -168,24 +171,24 @@ const PostAnalysisPage = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
-          title="Total Messages Collected"
+          title="Total Posts"
           value={posts.length.toLocaleString()}
-          Icon={Users2}
+          Icon={FileText}
         />
         <StatCard
-          title="Main Keyword Mentions"
+          title="Main Keyword Track"
           value={mainKeywordMentions.toLocaleString()}
           Icon={MessageSquareText}
         />
         <StatCard
-          title="Sub-Keyword Messages"
+          title="Sub-Keyword Track"
           value={subKeywordMentions.toLocaleString()}
           Icon={MessageCircleMore}
         />
         <StatCard
-          title="Total Engagements"
+          title="Total Comments"
           value={totalComments.toLocaleString()}
-          Icon={BarChart2}
+          Icon={MessagesSquare}
         />
       </div>
 

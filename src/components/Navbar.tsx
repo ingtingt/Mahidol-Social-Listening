@@ -1,3 +1,4 @@
+'use client';
 import Image from 'next/image';
 import React from 'react';
 import { Menu, Megaphone, User, LogOut } from 'lucide-react';
@@ -11,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import SearchBox from './SearchBox';
-
+import { usePathname } from 'next/navigation';
 type NavbarProps = {
   onMenuToggle: () => void;
 };
@@ -27,7 +28,7 @@ const Navbar = ({ onMenuToggle }: NavbarProps) => {
           className="w-[200px] p-2 bg-transparent outline-none"
         />
       </div> */}
-      <SearchBox />
+      {/* <SearchBox /> */}
       {/*Icon and User*/}
       <div className="flex items-center gap-6 justify-end w-full">
         <div className="bg-white rounded-full flex items-center justify-center cursor-pointer">
@@ -39,12 +40,12 @@ const Navbar = ({ onMenuToggle }: NavbarProps) => {
             <Button variant="outline">MUIC Portal</Button>
           </Link>
         </div>
-        <div className="bg-white rounded-full w-7 h-7 flex items-center justify-center cursor-pointer relative">
+        {/* <div className="bg-white rounded-full w-7 h-7 flex items-center justify-center cursor-pointer relative">
           <Image src="/announcement.png" alt="" width={20} height={20} />
           <div className="absolute -top-3 -right-3 w-5 h-5 flex items-center justify-center bg-purple-500 text-white rounded-full text-xs">
             1
           </div>
-        </div>
+        </div> */}
         {/* Profile Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

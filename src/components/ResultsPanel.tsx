@@ -1,5 +1,5 @@
 import React from 'react';
-import { LoaderCircle, Tags, Info } from 'lucide-react';
+import { LoaderCircle, Tags, Info, TextSearch } from 'lucide-react';
 import type { ExtractorResults } from '@/data/mockData';
 import KeywordTag from './KeywordTag';
 import {
@@ -45,7 +45,7 @@ const ResultsPanel = ({
           </div>
         ) : !results ? (
           <div className="h-full flex flex-col justify-center items-center text-center text-gray-500 p-4">
-            <Tags className="w-12 h-12 mb-4" />
+            <TextSearch className="w-12 h-12 mb-4" />
             <h3 className="font-semibold text-lg">Results will appear here</h3>
             <p className="text-sm max-w-xs">
               Paste your text on the left and click "Extract Keywords" to get

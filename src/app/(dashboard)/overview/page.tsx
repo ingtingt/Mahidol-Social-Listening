@@ -1,14 +1,26 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Download, SlidersHorizontal } from 'lucide-react';
+import {
+  Download,
+  SlidersHorizontal,
+  Frown,
+  Facebook,
+  FileText,
+} from 'lucide-react';
 // Import the redesigned StatCard (make sure you updated the component file!)
 import StatCard from '@/components/StatCard';
 import SentimentAreaChart from '@/components/SentimentAreaChart';
 import PlatformPerformance from '@/components/PlatformPerformance';
 import KeywordAnalysis from '@/components/KeywordAnalysis';
 // Import icons for the StatCards
-import { Users2, MessageSquareText, BarChart2, ThumbsUp } from 'lucide-react';
+import {
+  Users2,
+  MessageSquareText,
+  BarChart2,
+  ThumbsUp,
+  NotebookPen,
+} from 'lucide-react';
 import SentimentOverview from '@/components/SentimentOverview';
 
 // --- 1. Define Types ---
@@ -92,7 +104,7 @@ const Overviewpage = () => {
           </div>
 
           {/* Header Buttons */}
-          <div className="flex items-center space-x-2">
+          {/* <div className="flex items-center space-x-2">
             <button className="flex items-center text-sm bg-white/10 text-white border border-white/20 px-3 py-2 rounded-lg hover:bg-white/20 transition-colors backdrop-blur-sm">
               <SlidersHorizontal size={16} className="mr-2" />
               Filters
@@ -101,7 +113,7 @@ const Overviewpage = () => {
               <Download size={16} className="mr-2" />
               Export Report
             </button>
-          </div>
+          </div> */}
         </div>
 
         {/* Decorative circles */}
@@ -113,31 +125,21 @@ const Overviewpage = () => {
       {/* --- STAT CARDS --- */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
-          title="Total Mentions"
+          title="Total Posts"
+          changeText="vs last month"
           value={totalMentions.toLocaleString()}
-          change={12.5}
-          changeText="vs last month"
-          Icon={Users2} // Pass the icon component
+          Icon={FileText} // Pass the icon component
         />
         <StatCard
-          title="Positive Sentiment"
-          value="68%"
-          change={5.2}
-          changeText="vs last month"
-          Icon={ThumbsUp}
+          title="Negative Sentiment"
+          value="5"
+          changeText="Comments"
+          Icon={Frown}
         />
-        <StatCard
-          title="Top Platform"
-          value="Facebook"
-          change={-2.1}
-          changeText="vs last month"
-          Icon={BarChart2}
-        />
+        <StatCard title="Top Platform" value="Facebook" Icon={Facebook} />
         <StatCard
           title="Top Keyword"
           value={topKeywordsData.length > 0 ? topKeywordsData[0].name : 'N/A'}
-          change={18.9}
-          changeText="vs last month"
           Icon={MessageSquareText}
         />
       </div>

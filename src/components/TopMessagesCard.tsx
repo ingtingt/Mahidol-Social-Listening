@@ -12,6 +12,7 @@ import {
   Facebook,
   Twitter,
   Instagram,
+  ThumbsUp,
 } from 'lucide-react';
 import {
   Dialog,
@@ -94,22 +95,22 @@ const TopMessagesCard = ({ messages, onExtract }: CardProps) => {
       }}
     >
       <div className="bg-white p-6 rounded-xl shadow-sm">
-        <h3 className="font-bold text-lg">Top Messages by engagement</h3>
+        <h3 className="font-bold text-lg">Top Posts by engagement</h3>
         <div className="flex space-x-2 my-4">
           <FilterButton
-            text="Reactions"
-            icon={TrendingUp}
+            text="Top Likes"
+            icon={ThumbsUp}
             isActive={filter === 'reactionsCount'}
             onClick={() => setFilter('reactionsCount')}
           />
           <FilterButton
-            text="Comments"
+            text="Top Comments"
             icon={MessageCircle}
             isActive={filter === 'commentsCount'}
             onClick={() => setFilter('commentsCount')}
           />
           <FilterButton
-            text="Shares"
+            text="Top Shares"
             icon={Share2}
             isActive={filter === 'sharesCount'}
             onClick={() => setFilter('sharesCount')}
@@ -146,7 +147,7 @@ const TopMessagesCard = ({ messages, onExtract }: CardProps) => {
                         {item.platform}
                       </span>
                       <span className="flex items-center gap-1 text-xs text-gray-500">
-                        <TrendingUp size={14} /> {item.reactionsCount}
+                        <ThumbsUp size={14} /> {item.reactionsCount}
                       </span>
                       <span className="flex items-center gap-1 text-xs text-gray-500">
                         <MessageCircle size={14} /> {item.commentsCount}

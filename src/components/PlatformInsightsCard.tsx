@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Facebook, Twitter, Instagram, MoreVertical } from 'lucide-react';
+import Link from 'next/link';
 
 // 1. Update the type definition
 type InsightStats = {
@@ -82,9 +83,11 @@ const PlatformInsightsCard = () => {
                     </p>{' '}
                   </div>
                 </div>
-                <button className="text-xs font-semibold text-purple-600 border border-purple-200 px-3 py-1 rounded-lg hover:bg-purple-50">
-                  See detail
-                </button>
+                <Link href="/data-collection">
+                  <button className="text-xs font-semibold text-purple-600 border border-purple-200 px-3 py-1 rounded-lg hover:bg-purple-50">
+                    See detail
+                  </button>
+                </Link>
               </div>
 
               {/* --- NEW METRICS --- */}

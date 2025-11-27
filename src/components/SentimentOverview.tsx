@@ -1,9 +1,10 @@
 'use client';
 
 import {
-  PieChart,
-  Pie,
-  Cell,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
   Tooltip,
   ResponsiveContainer,
   Legend,
@@ -20,72 +21,100 @@ type Props = {
 };
 
 // --- 1. Beautiful Default Data ---
-// If your database is empty, the chart will show this data.
 const defaultData = [
-  { name: 'Positive', value: 65, fill: '#22c55e' }, // Green
-  { name: 'Neutral', value: 25, fill: '#eab308' }, // Yellow
-  { name: 'Negative', value: 10, fill: '#ef4444' }, // Red
+  { name: 'Positive', value: 450, fill: '#22c55e' }, // Green
+  { name: 'Neutral', value: 200, fill: '#eab308' }, // Yellow
+  { name: 'Negative', value: 50, fill: '#ef4444' }, // Red
 ];
 
 const SentimentOverview = ({ data }: Props) => {
-  // --- 2. Smart Data Selection ---
-  // Check if the incoming data is valid (has values > 0).
-  // If not, use the defaultData so the chart always looks good.
+  // Use the passed data if it has values, otherwise use the default mock data
   const hasRealData = data && data.some((item) => item.value > 0);
   const chartData = hasRealData ? data : defaultData;
 
-  // Calculate total for the center text
-  const total = chartData.reduce((acc, curr) => acc + curr.value, 0);
+  // 2. Transform the data into the single-row stacked format
+  // [{ name: 'Total', Positive: 450, Neutral: 200, Negative: 50 }]
+  const transformedData = [
+    {
+      name: 'Total',
+      ...Object.fromEntries(chartData.map((item) => [item.name, item.value])),
+    },
+  ];
+
+  const total =
+    transformedData[0].Positive +
+    transformedData[0].Neutral +
+    transformedData[0].Negative;
 
   return (
     <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-full flex flex-col">
       <h3 className="text-lg font-bold text-gray-800 mb-4">
-        Overall Sentiment
+        Overall Sentiment Breakdown
       </h3>
 
       <div className="flex-1 min-h-[300px] relative">
         <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie
-              data={chartData}
-              cx="50%"
-              cy="50%"
-              innerRadius={80}
-              outerRadius={110}
-              paddingAngle={5}
-              dataKey="value"
-              stroke="none"
-            >
-              {chartData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.fill} />
-              ))}
-            </Pie>
+          <BarChart
+            data={transformedData}
+            layout="horizontal"
+            stackOffset="expand" // 3. Makes it a 100% stacked bar
+            barSize={30}
+            margin={{ top: 10, right: 20, left: 20, bottom: 0 }}
+          >
+            <XAxis type="number" hide />
+            <YAxis type="category" hide dataKey="name" />
             <Tooltip
+              cursor={false}
               contentStyle={{
                 borderRadius: '8px',
                 border: 'none',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
               }}
-              itemStyle={{ color: '#1f2937', fontWeight: 600 }}
+              // Show percentage and value in the tooltip
+              formatter={(value, name, props) => {
+                const percent = (props.payload[name] / total) * 100;
+                return [
+                  `${value.toLocaleString()} (${percent.toFixed(1)}%)`,
+                  name,
+                ];
+              }}
             />
             <Legend
               verticalAlign="bottom"
               height={36}
               iconType="circle"
-              formatter={(value, entry: any) => (
-                <span className="text-sm text-gray-600 ml-1">{value}</span>
-              )}
+              // Show the percentage next to the category name
+              formatter={(value) => {
+                const percent = (transformedData[0][value] / total) * 100;
+                return (
+                  <span className="text-sm text-gray-600 ml-1">
+                    {value} ({percent.toFixed(1)}%)
+                  </span>
+                );
+              }}
+              wrapperStyle={{ paddingTop: '20px' }}
             />
-          </PieChart>
+
+            {/* 4. Render the stacked bars */}
+            {chartData.map((item) => (
+              <Bar
+                key={item.name}
+                dataKey={item.name}
+                stackId="a" // All bars belong to the same stack
+                fill={item.fill}
+              />
+            ))}
+          </BarChart>
         </ResponsiveContainer>
 
-        {/* Center Text */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none pb-8">
-          <span className="text-3xl font-bold text-gray-800">
+        {/* 5. Center Text (Total Count) */}
+        <div className="text-center mt-4">
+          <span className="text-xl font-bold text-gray-800">
             {total.toLocaleString()}
-            {!hasRealData && '%'}
           </span>
-          <span className="text-sm text-gray-400 font-medium">Total</span>
+          <span className="text-sm text-gray-400 font-medium ml-2">
+            Total Comments/Posts Analyzed
+          </span>
         </div>
       </div>
     </div>

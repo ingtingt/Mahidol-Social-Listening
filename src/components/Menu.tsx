@@ -30,12 +30,13 @@ import {
   Vote,
   Key,
   TextSearch,
+  MessagesSquare,
 } from 'lucide-react';
 
 const navItems = [
   { name: 'Overview', icon: LayoutGrid, path: '/overview' },
   { name: 'Post Analysis', icon: FileText, path: '/analytic' },
-  { name: 'Comment Analysis', icon: TrendingUp, path: '/comment-analysis' },
+  { name: 'Comment Analysis', icon: MessagesSquare, path: '/comment-analysis' },
   { name: 'Keyword Tracker', icon: Key, path: '/keyword-tracker' },
   { name: 'Keyword Extractor', icon: TextSearch, path: '/keyword-extractor' },
   {
@@ -44,7 +45,7 @@ const navItems = [
     path: '/data-collection',
   },
   { name: 'Model Evaluation', icon: Vote, path: '/model-evaluation' },
-  { name: 'Settings', icon: Settings, path: '/settings' },
+  // { name: 'Settings', icon: Settings, path: '/settings' },
 ];
 
 const Menu = () => {
