@@ -1,26 +1,19 @@
-# Lama Dev School Management Dashboard
+# Deployment Instructions:
 
-## Getting Started
+1. Unzip the project folder on the server.
 
-First, run the development server:
+2. Create an Environment File: Create a file named .env in the folder and add your Google API Key: GOOGLE_API_KEY=AIza...
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+3. Start the Application: Run the following command:
+
+```
+docker-compose --env-file .env up -d --build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+4. Initialize Database: Run this command once to create tables and import the dataset:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+docker exec -it muic_dashboard_web npm run docker:init
+```
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Lama Dev Youtube Channel](https://youtube.com/lamadev) 
-- [Next.js](https://nextjs.org/learn)
+5. Access: The dashboard is now running at http://localhost:3000 (or the server's IP address).
