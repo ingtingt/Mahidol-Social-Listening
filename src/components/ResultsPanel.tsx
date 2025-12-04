@@ -48,8 +48,8 @@ const ResultsPanel = ({
             <TextSearch className="w-12 h-12 mb-4" />
             <h3 className="font-semibold text-lg">Results will appear here</h3>
             <p className="text-sm max-w-xs">
-              Paste your text on the left and click "Extract Keywords" to get
-              started.
+              Paste your text on the left and click &quot;Extract Keywords&quot;
+              to get started.
             </p>
           </div>
         ) : (

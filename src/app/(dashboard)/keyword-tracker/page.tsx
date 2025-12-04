@@ -161,7 +161,8 @@ const KeywordTrackerPage = () => {
         <DialogContent className="max-w-3xl">
           <DialogHeader>
             <DialogTitle>
-              Posts containing "{selectedKeyword?.name}"
+              Posts containing Posts containing &quot;{selectedKeyword?.name}
+              &quot;
             </DialogTitle>
             <DialogDescription>
               Showing all posts linked to this keyword.
