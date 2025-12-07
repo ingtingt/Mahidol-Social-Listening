@@ -1,13 +1,18 @@
-import type { TopKeyword } from '@/data/mockData';
+import React from 'react';
+
+// 1. Define the type locally (or import a compatible one)
+// We removed 'sentiment' because your API doesn't provide it, and this chart doesn't use it.
+type KeywordData = {
+  name: string;
+  mentions: number;
+};
 
 type ListProps = {
-  data: TopKeyword[];
+  data: KeywordData[];
 };
 
 const KeywordAnalysis = ({ data }: ListProps) => {
-  // 1. Calculate the maximum value dynamically
-  // We use Math.max to find the highest mention count in the list
-  // We default to 1 to prevent "divide by zero" errors if data is empty
+  // 2. Calculate the maximum value dynamically
   const maxMentions = Math.max(...data.map((d) => d.mentions), 1);
 
   return (
@@ -25,7 +30,7 @@ const KeywordAnalysis = ({ data }: ListProps) => {
               <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
                 <div
                   className="bg-purple-500 h-full rounded-full transition-all duration-500 ease-out"
-                  // 2. Calculate width relative to the maximum value
+                  // Calculate width relative to the maximum value
                   style={{ width: `${(kw.mentions / maxMentions) * 100}%` }}
                 ></div>
               </div>

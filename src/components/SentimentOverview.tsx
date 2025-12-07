@@ -20,7 +20,6 @@ type Props = {
   data: SentimentData[];
 };
 
-// --- 1. Beautiful Default Data ---
 const defaultData = [
   { name: 'Positive', value: 450, fill: '#22c55e' }, // Green
   { name: 'Neutral', value: 200, fill: '#eab308' }, // Yellow
@@ -28,23 +27,19 @@ const defaultData = [
 ];
 
 const SentimentOverview = ({ data }: Props) => {
-  // Use the passed data if it has values, otherwise use the default mock data
   const hasRealData = data && data.some((item) => item.value > 0);
   const chartData = hasRealData ? data : defaultData;
 
-  // 2. Transform the data into the single-row stacked format
-  // [{ name: 'Total', Positive: 450, Neutral: 200, Negative: 50 }]
+  // --- FIX 1: Calculate total using chartData (Safe) ---
+  const total = chartData.reduce((acc, curr) => acc + curr.value, 0);
+
+  // Transform data for Recharts
   const transformedData = [
     {
       name: 'Total',
       ...Object.fromEntries(chartData.map((item) => [item.name, item.value])),
     },
   ];
-
-  const total =
-    transformedData[0].Positive +
-    transformedData[0].Neutral +
-    transformedData[0].Negative;
 
   return (
     <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-full flex flex-col">
@@ -57,7 +52,7 @@ const SentimentOverview = ({ data }: Props) => {
           <BarChart
             data={transformedData}
             layout="horizontal"
-            stackOffset="expand" // 3. Makes it a 100% stacked bar
+            stackOffset="expand"
             barSize={30}
             margin={{ top: 10, right: 20, left: 20, bottom: 0 }}
           >
@@ -70,9 +65,8 @@ const SentimentOverview = ({ data }: Props) => {
                 border: 'none',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
               }}
-              // Show percentage and value in the tooltip
-              formatter={(value, name, props) => {
-                const percent = (props.payload[name] / total) * 100;
+              formatter={(value: number, name: string) => {
+                const percent = (value / total) * 100;
                 return [
                   `${value.toLocaleString()} (${percent.toFixed(1)}%)`,
                   name,
@@ -83,31 +77,31 @@ const SentimentOverview = ({ data }: Props) => {
               verticalAlign="bottom"
               height={36}
               iconType="circle"
-              // Show the percentage next to the category name
-              formatter={(value) => {
-                const percent = (transformedData[0][value] / total) * 100;
+              wrapperStyle={{ paddingTop: '20px' }}
+              // --- FIX 2: Look up value from chartData instead of transformedData ---
+              formatter={(value: string) => {
+                const item = chartData.find((i) => i.name === value);
+                const val = item ? item.value : 0;
+                const percent = (val / total) * 100;
                 return (
                   <span className="text-sm text-gray-600 ml-1">
                     {value} ({percent.toFixed(1)}%)
                   </span>
                 );
               }}
-              wrapperStyle={{ paddingTop: '20px' }}
             />
 
-            {/* 4. Render the stacked bars */}
             {chartData.map((item) => (
               <Bar
                 key={item.name}
                 dataKey={item.name}
-                stackId="a" // All bars belong to the same stack
+                stackId="a"
                 fill={item.fill}
               />
             ))}
           </BarChart>
         </ResponsiveContainer>
 
-        {/* 5. Center Text (Total Count) */}
         <div className="text-center mt-4">
           <span className="text-xl font-bold text-gray-800">
             {total.toLocaleString()}
