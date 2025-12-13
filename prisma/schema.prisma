@@ -51,7 +51,7 @@ model Post {
   
   // The category of the main post, analyzed by your app
   category       String?   // e.g., "Event", "Warning annoucements"
-  
+  sentiment      String?
   // Relation: A post has many comments (One-to-Many)
   comments        Comment[]
   
