@@ -1,143 +1,135 @@
 import { PrismaClient } from '@prisma/client';
-import * as fs from 'fs';
-import * as path from 'path';
+import fs from 'fs';
+import path from 'path';
 import Papa from 'papaparse';
 
 const prisma = new PrismaClient();
 
-// ... (Types are the same) ...
-type CsvRow = {
-  created_time: string;
-  'Predicted Sentiment': string;
-};
-type JsonPost = {
-  post_id: string;
-  content: string;
-  created_time: string;
-  permalink: string;
-  reactions_count: number;
-  shares_count: number;
-  comments_count: number;
-  comments: JsonComment[];
-};
-type JsonComment = {
-  comment_id: string;
-  from: { name?: string; id?: string };
-  message: string;
-  created_time: string;
-  like_count: number;
-  reply_count: number;
-};
-
-// --- HELPER TO GENERATE RANDOM SENTIMENT ---
-function getRandomSentiment() {
-  const sentiments = ['Positive', 'Neutral', 'Negative'];
-  // Weight it slightly towards Neutral/Positive for realism
-  const weights = [0.3, 0.5, 0.2];
-  const random = Math.random();
-
-  if (random < weights[0]) return sentiments[0];
-  if (random < weights[0] + weights[1]) return sentiments[1];
-  return sentiments[2];
+// 1. Define the shape of your CSV data
+interface CsvRow {
+  id: string; // The Post ID or Comment ID
+  sentiment: string; // "Positive", "Neutral", "Negative"
+  category: string; // "Inquiry", "Complaint", etc.
 }
 
 async function main() {
   console.log('Starting data merge and ingestion script...');
 
-  // 1. Read and parse the CSV file
+  // --- STEP A: Read the Real Labels from CSV ---
   const csvFilePath = path.join(
     process.cwd(),
     'merged_facebook_sentiment_results.csv'
   );
-  const csvFileContent = fs.readFileSync(csvFilePath, 'utf-8');
-  const parseResult = Papa.parse<CsvRow>(csvFileContent, {
+  const csvFileContent = fs.readFileSync(csvFilePath, 'utf8');
+
+  // Parse CSV
+  const parsedCsv = Papa.parse<CsvRow>(csvFileContent, {
     header: true,
     skipEmptyLines: true,
   });
 
-  const categoryMap = new Map<string, string>();
-  for (const row of parseResult.data) {
-    if (row.created_time && row['Predicted Sentiment']) {
-      const jsonStyleTime = row.created_time
-        .replace(' ', 'T')
-        .replace(/:(\d\d)$/, '$1');
-      categoryMap.set(jsonStyleTime, row['Predicted Sentiment']);
+  // Create a "Lookup Map" for fast searching
+  // Map Key = ID, Map Value = { sentiment, category }
+  const labelMap = new Map<string, { sentiment: string; category: string }>();
+
+  parsedCsv.data.forEach((row) => {
+    if (row.id) {
+      // Normalize sentiment (First letter uppercase, rest lowercase)
+      const cleanSentiment = row.sentiment
+        ? row.sentiment.charAt(0).toUpperCase() +
+          row.sentiment.slice(1).toLowerCase()
+        : 'Neutral';
+
+      const cleanCategory = row.category || 'Uncategorized';
+
+      labelMap.set(row.id, {
+        sentiment: cleanSentiment,
+        category: cleanCategory,
+      });
     }
-  }
+  });
 
-  // 2. Read the JSON file
+  console.log(`Loaded ${labelMap.size} labels from CSV.`);
+
+  // --- STEP B: Read the JSON Data ---
   const jsonFilePath = path.join(process.cwd(), 'facebook_data.json');
-  const jsonFileContent = fs.readFileSync(jsonFilePath, 'utf-8');
-  const jsonData: JsonPost[] = JSON.parse(jsonFileContent);
+  const rawData = fs.readFileSync(jsonFilePath, 'utf8');
+  const posts = JSON.parse(rawData);
 
-  console.log(`Found ${jsonData.length} JSON posts to process.`);
+  console.log(`Found ${posts.length} JSON posts to process.`);
 
-  // 3. Loop through JSON data and insert
-  for (const post of jsonData) {
-    if (!post.content) continue;
-
-    const category = categoryMap.get(post.created_time) || 'Uncategorized';
-
+  // --- STEP C: Insert into Database ---
+  for (const post of posts) {
     try {
+      // 1. Look up Post Labels
+      const postLabels = labelMap.get(post.post_id) || {
+        sentiment: 'Neutral',
+        category: 'Uncategorized',
+      };
+
       await prisma.post.create({
         data: {
           id: post.post_id,
           platform: 'Facebook',
-          content: post.content,
+          content: post.message || '[No Content]',
           createdAt: new Date(post.created_time),
-          permalink: post.permalink,
-          reactionsCount: post.reactions_count || 0,
-          sharesCount: post.shares_count || 0,
-          commentsCount: post.comments_count || 0,
-          category: category,
+          permalink: post.permalink_url,
+          reactionsCount: post.reactions?.summary?.total_count || 0,
+          sharesCount: post.shares?.count || 0,
+          commentsCount: post.comments?.summary?.total_count || 0,
 
-          // --- ADD FAKE SENTIMENT ---
-          sentiment: getRandomSentiment(),
-          // --------------------------
+          // USE REAL DATA HERE
+          sentiment: postLabels.sentiment,
+          category: postLabels.category,
+        },
+      });
 
-          comments: {
-            create: post.comments.map((comment: JsonComment) => ({
-              id: comment.comment_id,
+      // 2. Process Comments
+      if (post.comments && post.comments.data) {
+        for (const comment of post.comments.data) {
+          // Look up Comment Labels
+          const commentLabels = labelMap.get(comment.id) || {
+            sentiment: 'Neutral',
+            category: 'Uncategorized',
+          };
+
+          await prisma.comment.create({
+            data: {
+              id: comment.id,
               message: comment.message,
               createdAt: new Date(comment.created_time),
               likeCount: comment.like_count || 0,
-              replyCount: comment.reply_count || 0,
+              replyCount: comment.comment_count || 0,
+              postId: post.post_id,
 
-              // --- ADD FAKE SENTIMENT TO COMMENTS TOO ---
-              sentiment: getRandomSentiment(),
-              category: 'Uncategorized', // Or random category if you want
-              // ------------------------------------------
+              // USE REAL DATA HERE
+              sentiment: commentLabels.sentiment,
+              category: commentLabels.category,
 
-              author:
-                comment.from && comment.from.id
-                  ? {
-                      connectOrCreate: {
-                        where: { id: comment.from.id },
-                        create: {
-                          id: comment.from.id,
-                          name: comment.from.name || 'Unknown User',
-                        },
-                      },
-                    }
-                  : undefined,
-            })),
-          },
-        },
-      });
-      console.log(`Inserted: ${post.post_id}`);
-    } catch (e: any) {
-      if (e.code !== 'P2002')
-        console.error(`Failed: ${post.post_id}`, e.message);
+              author: {
+                connectOrCreate: {
+                  where: { id: comment.from.id },
+                  create: {
+                    id: comment.from.id,
+                    name: comment.from.name,
+                  },
+                },
+              },
+            },
+          });
+        }
+      }
+    } catch (error) {
+      console.log(`Skipping duplicate or error for post ${post.post_id}`);
     }
   }
 
-  console.log('Finished.');
+  console.log('Data ingestion finished.');
 }
 
 main()
-  .catch(async (e) => {
+  .catch((e) => {
     console.error(e);
-    await prisma.$disconnect();
     process.exit(1);
   })
   .finally(async () => {
