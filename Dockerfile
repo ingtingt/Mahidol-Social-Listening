@@ -53,7 +53,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
 COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
 COPY --from=builder --chown=nextjs:nodejs /app/facebook_data.json ./facebook_data.json
 COPY --from=builder --chown=nextjs:nodejs /app/merged_facebook_sentiment_results.csv ./merged_facebook_sentiment_results.csv
-
+COPY --from=builder --chown=nextjs:nodejs /app/Comment_rows.csv ./Comment_rows.csv
 # Ensure permissions
 RUN chown -R nextjs:nodejs /app
 
