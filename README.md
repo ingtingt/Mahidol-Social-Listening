@@ -1,19 +1,34 @@
-# Deployment Instructions:
+MUIC Social Listening Dashboard - Deployment Instructions
 
-1. Unzip the project folder on the server.
+PREREQUISITES:
 
-2. Create an Environment File: Create a file named .env in the folder and add your Google API Key: GOOGLE_API_KEY=AIza...
+- Docker Desktop must be installed and running.
 
-3. Start the Application: Run the following command:
+STEP 1: SETUP ENVIRONMENT
 
-```
-docker-compose --env-file .env up -d --build
-```
+1. Unzip the project folder.
+2. Create a file named ".env" in the root folder.
+3. Add these lines to the .env file:
+   DATABASE_URL="postgresql://postgres:password@db:5432/muic_db?schema=public"
+   DIRECT_URL="postgresql://postgres:password@db:5432/muic_db?schema=public"
+   GOOGLE_API_KEY="[Insert Your Google API Key Here]"
 
-4. Initialize Database: Run this command once to create tables and import the dataset:
+STEP 2: START THE APP
 
-```
-docker exec -it muic_dashboard_web npm run docker:init
-```
+1. Open a terminal in the project folder.
+2. Run the command:
+   docker compose up -d --build
 
-5. Access: The dashboard is now running at http://localhost:3000 (or the server's IP address).
+   (Wait for the containers "muic_dashboard_web" and "muic_dashboard_db" to start).
+
+STEP 3: LOAD THE DATA (CRITICAL)
+The database starts empty. You must run this command to load the 91 Posts and Comments from the CSV files:
+
+docker exec -it muic_dashboard_web npm run load-data
+
+(Wait for the success message: "Successfully inserted 91 posts" and "Successfully inserted comments").
+
+STEP 4: ACCESS THE DASHBOARD
+
+1. Open your browser to: http://localhost:3000
+2. The dashboard should now display all posts, content, and sentiment analysis.
