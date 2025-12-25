@@ -8,7 +8,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-// Define our new Keyword type which includes the post count
 type KeywordWithCount = KeywordType & {
   _count: { posts: number };
 };

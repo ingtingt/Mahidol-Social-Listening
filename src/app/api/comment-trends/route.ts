@@ -11,7 +11,6 @@ export async function GET() {
       include: {
         author: true,
         post: {
-          // --- ADD THIS ---
           select: {
             id: true,
             permalink: true,

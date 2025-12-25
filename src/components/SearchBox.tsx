@@ -4,7 +4,6 @@ const SearchBox = () => {
   return (
     <div className="relative w-64">
       {' '}
-      {/* Adjust width as needed */}
       <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
       <input
         type="text"

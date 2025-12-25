@@ -21,7 +21,6 @@ async function main() {
       content: string;
       permalink: string;
       createdAt: string;
-      // NEW: Capture counts from CSV
       reactionsCount: string;
       sharesCount: string;
       commentsCount: string;
@@ -49,7 +48,6 @@ async function main() {
             content: row.content || '',
             permalink: row.permalink || '',
             createdAt: row.createdAt || '',
-            // CAPTURE COUNTS
             reactionsCount: row.reactionsCount || '0',
             sharesCount: row.sharesCount || '0',
             commentsCount: row.commentsCount || '0',
@@ -95,7 +93,6 @@ async function main() {
             post.permalink_url ||
             `https://facebook.com/${post.post_id}`,
 
-          // FIX: Use CSV counts (convert string to int)
           reactionsCount: parseInt(csvPost.reactionsCount) || 0,
           sharesCount: parseInt(csvPost.sharesCount) || 0,
           commentsCount: parseInt(csvPost.commentsCount) || 0,
@@ -105,9 +102,7 @@ async function main() {
         },
       });
       insertedCount++;
-    } catch (error) {
-      /* Ignore duplicates */
-    }
+    } catch (error) {}
   }
   console.log(`✅ Successfully inserted ${insertedCount} posts.`);
 
@@ -137,8 +132,6 @@ async function main() {
               id: commentId,
               message: row.message || '[No Message]',
               createdAt: row.createdAt ? new Date(row.createdAt) : new Date(),
-
-              // FIX: Ensure these are parsed as integers
               likeCount: parseInt(row.likeCount || '0'),
               replyCount: parseInt(row.replyCount || '0'),
 

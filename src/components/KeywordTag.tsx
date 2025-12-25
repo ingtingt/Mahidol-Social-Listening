@@ -3,13 +3,12 @@ import { Plus, Link as LinkIcon } from 'lucide-react';
 
 type KeywordTagProps = {
   text: string;
-  relevance?: number; // 1. Added '?' to make it optional
+  relevance?: number;
   status: 'new' | 'existing' | 'linked';
   postCount?: number;
   onOpenAddModal: (keywordName: string) => void;
 };
 
-// 2. Added default value 'relevance = 0'
 const KeywordTag = ({
   text,
   relevance = 0,

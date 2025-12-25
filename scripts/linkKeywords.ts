@@ -11,7 +11,7 @@ async function main() {
 
   // 2. Get all posts from the database
   const posts = await prisma.post.findMany({
-    select: { id: true, content: true }, // Only get what we need
+    select: { id: true, content: true },
   });
   console.log(`Found ${posts.length} posts to analyze.`);
 
@@ -23,7 +23,6 @@ async function main() {
 
     // 4. Loop over every keyword and check if it's in the post content
     for (const keyword of keywords) {
-      // This is a simple, case-insensitive check
       if (post.content.toLowerCase().includes(keyword.name.toLowerCase())) {
         keywordsToConnect.push({ id: keyword.id });
       }
@@ -35,7 +34,7 @@ async function main() {
         where: { id: post.id },
         data: {
           keywords: {
-            connect: keywordsToConnect, // This creates the links
+            connect: keywordsToConnect,
           },
         },
       });

@@ -1,7 +1,5 @@
 import React from 'react';
 
-// 1. Define the type locally (or import a compatible one)
-// We removed 'sentiment' because your API doesn't provide it, and this chart doesn't use it.
 type KeywordData = {
   name: string;
   mentions: number;
@@ -12,7 +10,6 @@ type ListProps = {
 };
 
 const KeywordAnalysis = ({ data }: ListProps) => {
-  // 2. Calculate the maximum value dynamically
   const maxMentions = Math.max(...data.map((d) => d.mentions), 1);
 
   return (
@@ -30,7 +27,6 @@ const KeywordAnalysis = ({ data }: ListProps) => {
               <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
                 <div
                   className="bg-purple-500 h-full rounded-full transition-all duration-500 ease-out"
-                  // Calculate width relative to the maximum value
                   style={{ width: `${(kw.mentions / maxMentions) * 100}%` }}
                 ></div>
               </div>

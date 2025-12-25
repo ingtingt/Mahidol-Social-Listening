@@ -20,7 +20,7 @@ async function main() {
     data: {
       name: 'Mahidol University',
       type: 'Main',
-      //userId: user1.id, // Link to the user we just created
+      //userId: user1.id,
     },
   });
   await prisma.keyword.create({

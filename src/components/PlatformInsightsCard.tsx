@@ -90,7 +90,6 @@ const PlatformInsightsCard = () => {
                 </Link>
               </div>
 
-              {/* --- NEW METRICS --- */}
               <div className="flex justify-between text-center">
                 <div>
                   <p className="font-bold text-lg text-gray-800">
@@ -111,7 +110,6 @@ const PlatformInsightsCard = () => {
                   <p className="text-xs text-gray-500">Tracked Keywords</p>
                 </div>
               </div>
-              {/* --- END NEW METRICS --- */}
             </div>
           );
         })}

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Plus, ExternalLink } from 'lucide-react';
-import { Keyword, Post } from '@prisma/client'; // Import Post
+import { Keyword, Post } from '@prisma/client';
 import KeywordTable from '@/components/KeywordTable';
 import AddKeywordModal from '@/components/AddKeywordModal';
 import HighlightText from '@/components/HighlightText'; // Import our new component

@@ -8,7 +8,6 @@ import {
   Facebook,
   FileText,
 } from 'lucide-react';
-// Import the redesigned StatCard (make sure you updated the component file!)
 import StatCard from '@/components/StatCard';
 import SentimentAreaChart from '@/components/SentimentAreaChart';
 import PlatformPerformance from '@/components/PlatformPerformance';
@@ -128,7 +127,7 @@ const Overviewpage = () => {
           title="Total Posts"
           changeText="vs last month"
           value={totalMentions.toLocaleString()}
-          Icon={FileText} // Pass the icon component
+          Icon={FileText}
         />
         <StatCard
           title="Negative Sentiment"

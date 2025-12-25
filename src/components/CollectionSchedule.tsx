@@ -87,7 +87,6 @@ const CollectionSchedule = () => {
     }
   };
 
-  // --- THIS IS THE FIX (Part 1) ---
   // This function now accepts content AND the postId
   const handleExtractClick = (content: string, postId: string) => {
     const dataToStore = {
@@ -97,7 +96,6 @@ const CollectionSchedule = () => {
     sessionStorage.setItem('textToExtract', JSON.stringify(dataToStore));
     router.push('/keyword-extractor');
   };
-  // --- END FIX ---
 
   // --- Calendar Logic ---
   const monthNames = [

@@ -6,7 +6,7 @@ const LoginPage = () => {
     <div className="min-h-screen flex items-center justify-center p-4">
       {/* 1. Full-screen Background Image */}
       <Image
-        src="/MUICbuilding2.png" // IMPORTANT: Replace with your image path
+        src="/MUICbuilding2.png"
         layout="fill"
         objectFit="cover"
         alt="MUIC campus background"
@@ -18,7 +18,7 @@ const LoginPage = () => {
         {/* Header Section */}
         <div className="text-center mb-8">
           <Image
-            src="/muiclogo.png" // IMPORTANT: Replace with your logo path
+            src="/muiclogo.png"
             alt="MUIC Logo"
             width={360}
             height={60}

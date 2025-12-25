@@ -13,7 +13,7 @@ export async function GET(
     const keyword = await prisma.keyword.findUnique({
       where: { id: id },
       include: {
-        posts: true, // This is the magic! Get all connected posts.
+        posts: true,
       },
     });
 

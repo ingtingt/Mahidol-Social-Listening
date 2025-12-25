@@ -25,7 +25,6 @@ const chartData = modelList.map((modelName) => {
   return {
     name: modelName,
     accuracy: modelData.summary.accuracy,
-    // f1 score removed
   };
 });
 

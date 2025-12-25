@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import CollectionSchedule from '@/components/CollectionSchedule';
-// We'll create these components next
 import ManageSources from '@/components/ManageSources';
 import DatabaseTable from '@/components/DatabaseTable';
 

@@ -34,7 +34,6 @@ export async function GET() {
       { status: 500 }
     );
   } finally {
-    // In a serverless environment, it's good practice to disconnect
     await prisma.$disconnect();
   }
 }

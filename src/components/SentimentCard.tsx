@@ -1,5 +1,5 @@
 import { ArrowUp } from 'lucide-react';
-import type { SentimentData } from '@/data/mockData'; // Import the type
+import type { SentimentData } from '@/data/mockData';
 
 type SentimentCardProps = {
   data: SentimentData;

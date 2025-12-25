@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import * as fs from 'fs';
 import * as path from 'path';
-import Papa from 'papaparse'; // Import the CSV parser
+import Papa from 'papaparse';
 
 const prisma = new PrismaClient();
 
@@ -15,7 +15,7 @@ type CsvRow = {
   shares_count: string;
   comments_count: string;
   comments: string; // Comments are a JSON string in the CSV
-  'Predicted Sentiment': string; // This is your category
+  'Predicted Sentiment': string;
 };
 
 type JsonComment = {
@@ -42,7 +42,7 @@ async function main() {
 
   // 2. Parse the CSV file
   const parseResult = Papa.parse<CsvRow>(fileContent, {
-    header: true, // This tells PapaParse to use the first row as keys
+    header: true,
     skipEmptyLines: true,
   });
 
@@ -59,7 +59,6 @@ async function main() {
     // 4. Parse the comments string from the CSV
     let comments: JsonComment[] = [];
     try {
-      // The 'comments' column is a string '[]' or '[{...}]'
       comments = JSON.parse(post.comments || '[]');
     } catch (e) {
       console.warn(
@@ -79,9 +78,7 @@ async function main() {
           reactionsCount: Number(post.reactions_count) || 0,
           sharesCount: Number(post.shares_count) || 0,
           commentsCount: Number(post.comments_count) || 0,
-          category: post['Predicted Sentiment'], // Assign the category here
-
-          // Handle nested comments and authors
+          category: post['Predicted Sentiment'],
           comments: {
             create: comments.map((comment: JsonComment) => ({
               id: comment.comment_id,

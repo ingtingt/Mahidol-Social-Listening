@@ -63,11 +63,10 @@ const DatabaseTable = () => {
     router.push('/keyword-extractor');
   };
 
-  // --- 1. UPDATED FUNCTION: Accepts postId ---
   const handleCommentExtractClick = (content: string, postId: string) => {
     const dataToStore = {
       content: content,
-      postId: postId, // Now we pass the link!
+      postId: postId,
     };
     sessionStorage.setItem('textToExtract', JSON.stringify(dataToStore));
     router.push('/keyword-extractor');

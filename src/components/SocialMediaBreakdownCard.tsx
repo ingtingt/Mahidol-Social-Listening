@@ -5,7 +5,6 @@ type CardProps = {
   data: SocialMediaCardData;
 };
 
-// A simple way to map names to icons
 const iconMap = {
   Facebook: <Facebook className="w-5 h-5 text-blue-500" />,
   Twitter: <Twitter className="w-5 h-5 text-sky-400" />,
@@ -28,7 +27,6 @@ const SocialMediaBreakdownCard = ({ data }: CardProps) => (
     <ul className="space-y-4">
       {data.channels.map((item) => (
         <li key={item.name}>
-          {/* This is the top part with the icon, name, and stats */}
           <div className="flex items-center justify-between mb-1 text-sm">
             <div className="flex items-center">
               {iconMap[item.name]}
@@ -48,10 +46,7 @@ const SocialMediaBreakdownCard = ({ data }: CardProps) => (
             </div>
           </div>
 
-          {/* THIS IS THE PROGRESS BAR SECTION */}
-          {/* Outer gray "track" */}
           <div className="w-full h-1.5 bg-gray-200 rounded-full ">
-            {/* Inner colored "fill" */}
             <div
               className="h-1.5 rounded-full"
               style={{

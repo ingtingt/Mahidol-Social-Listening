@@ -29,8 +29,6 @@ const defaultData = [
 const SentimentOverview = ({ data }: Props) => {
   const hasRealData = data && data.some((item) => item.value > 0);
   const chartData = hasRealData ? data : defaultData;
-
-  // --- FIX 1: Calculate total using chartData (Safe) ---
   const total = chartData.reduce((acc, curr) => acc + curr.value, 0);
 
   // Transform data for Recharts
@@ -78,7 +76,6 @@ const SentimentOverview = ({ data }: Props) => {
               height={36}
               iconType="circle"
               wrapperStyle={{ paddingTop: '20px' }}
-              // --- FIX 2: Look up value from chartData instead of transformedData ---
               formatter={(value: string) => {
                 const item = chartData.find((i) => i.name === value);
                 const val = item ? item.value : 0;
