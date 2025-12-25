@@ -41,3 +41,4 @@ next-env.d.ts
 # Data files
 facebook_data.json
 merged_facebook_sentiment_results.csv
+Comment_rows.csv
