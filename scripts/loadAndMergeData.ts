@@ -9,6 +9,98 @@ interface CsvRow {
   [key: string]: string;
 }
 
+type XquikRow = Record<string, unknown>;
+
+function readString(row: XquikRow, keys: string[], fallback: string): string {
+  for (const key of keys) {
+    const value = row[key];
+    if (typeof value === 'string' && value.trim() !== '') return value;
+    if (typeof value === 'number' && Number.isFinite(value)) return String(value);
+  }
+  return fallback;
+}
+
+function readNumber(row: XquikRow, keys: string[]): number {
+  for (const key of keys) {
+    const value = row[key];
+    if (typeof value === 'number' && Number.isFinite(value)) return value;
+    if (typeof value === 'string' && value.trim() !== '') {
+      const parsed = Number(value);
+      if (Number.isFinite(parsed)) return parsed;
+    }
+  }
+  return 0;
+}
+
+function rowsFromXquikPayload(payload: unknown): XquikRow[] {
+  if (Array.isArray(payload)) return payload as XquikRow[];
+  if (payload === null || typeof payload !== 'object') return [];
+
+  const record = payload as Record<string, unknown>;
+  for (const key of ['data', 'tweets', 'items', 'results']) {
+    const value = record[key];
+    if (Array.isArray(value)) return value as XquikRow[];
+  }
+
+  return [];
+}
+
+function readXquikRows(filePath: string): XquikRow[] {
+  const content = fs.readFileSync(filePath, 'utf8');
+  if (filePath.endsWith('.csv')) {
+    return Papa.parse<CsvRow>(content, {
+      header: true,
+      skipEmptyLines: true,
+    }).data;
+  }
+
+  if (filePath.endsWith('.jsonl') || filePath.endsWith('.ndjson')) {
+    return content
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((line) => JSON.parse(line) as XquikRow);
+  }
+
+  return rowsFromXquikPayload(JSON.parse(content));
+}
+
+async function ingestXquikExport() {
+  const exportPath = process.env.XQUIK_EXPORT_PATH;
+  if (!exportPath) return 0;
+
+  const rows = readXquikRows(path.resolve(exportPath));
+  let inserted = 0;
+
+  for (const [index, row] of rows.entries()) {
+    const id = readString(row, ['id', 'tweetId', 'tweet_id', 'url'], `xquik-${index}`);
+    const content = readString(row, ['text', 'content', 'fullText', 'body'], '');
+    if (!content) continue;
+
+    try {
+      await prisma.post.create({
+        data: {
+          id,
+          platform: 'Twitter',
+          content,
+          createdAt: new Date(readString(row, ['createdAt', 'created_at', 'timestamp'], new Date().toISOString())),
+          permalink: readString(row, ['url', 'permalink'], `https://x.com/i/web/status/${id}`),
+          reactionsCount: readNumber(row, ['likeCount', 'like_count', 'likes']),
+          sharesCount: readNumber(row, ['retweetCount', 'retweet_count', 'reposts', 'retweets']),
+          commentsCount: readNumber(row, ['replyCount', 'reply_count', 'replies']),
+          sentiment: readString(row, ['sentiment'], 'Neutral'),
+          category: readString(row, ['category'], 'Reviewed X Source'),
+        },
+      });
+      inserted++;
+    } catch (error: any) {
+      if (error.code !== 'P2002') throw error;
+    }
+  }
+
+  return inserted;
+}
+
 async function main() {
   console.log('Starting data merge (POSTS + COMMENTS from CSV with COUNTS)...');
 
@@ -155,6 +247,11 @@ async function main() {
     }
   } catch (err) {
     console.error('Error loading Comment CSV:', err);
+  }
+
+  const xquikCount = await ingestXquikExport();
+  if (xquikCount > 0) {
+    console.log(`✅ Successfully inserted ${xquikCount} Xquik export posts.`);
   }
 
   console.log('Data ingestion finished.');

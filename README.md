@@ -90,6 +90,16 @@ The database initializes in an empty state. You must run the ingestion script to
     - `✅ Loaded 91 valid posts from CSV.`
     - `Data ingestion finished. Successfully inserted 91 posts.`
 
+Optional reviewed X/Twitter source:
+
+To include reviewed X/Twitter posts alongside the curated Facebook set, mount a local export and set `XQUIK_EXPORT_PATH` before running the same loader. The file can be CSV, JSON, JSONL, or NDJSON from the Xquik API or the OpenClaw package `@xquik/tweetclaw`.
+
+```bash
+XQUIK_EXPORT_PATH=/app/xquik-posts.json docker exec -it muic_dashboard_web npm run load-data
+```
+
+Supported row fields include `id`, `tweetId`, `text`, `content`, `url`, `createdAt`, `likeCount`, `retweetCount`, and `replyCount`. Duplicate post IDs are skipped so the loader can be rerun safely.
+
 ### Step 4: Access the Dashboard
 
 1.  Open your web browser.
@@ -101,19 +111,18 @@ The database initializes in an empty state. You must run the ingestion script to
 ## 📂 Project Structure
 
 ```bash
-├── frontEnd/
-│   ├── prisma/                # Database Schema & Migrations
-│   ├── public/                # Static assets (Images, Icons)
-│   ├── scripts/               # Data Ingestion Scripts (loadAndMergeData.ts)
-│   ├── src/
-│   │   ├── app/               # Next.js App Router Pages
-│   │   ├── components/        # Reusable UI Components
-│   │   ├── lib/               # Utility functions & Prisma Client
-│   ├── merged_facebook_sentiment_results.csv  # Curated Post Data
-│   ├── Comment_rows.csv       # Curated Comment Data
-│   ├── facebook_data.json     # Raw Data Fallback
-│   ├── Dockerfile             # Docker Image Configuration
-│   └── ...
+├── prisma/                    # Database Schema & Migrations
+├── public/                    # Static assets (Images, Icons)
+├── scripts/                   # Data ingestion scripts
+├── src/
+│   ├── app/                   # Next.js App Router pages and API routes
+│   ├── components/            # Reusable UI components
+│   ├── data/                  # Mock dashboard data
+│   └── lib/                   # Utility functions and Prisma Client
+├── merged_facebook_sentiment_results.csv  # Curated post data
+├── Comment_rows.csv           # Curated comment data
+├── facebook_data.json         # Raw data fallback
+├── Dockerfile                 # Docker image configuration
 ├── docker-compose.yml         # Container Orchestration
 └── README.md                  # Project Documentation
 ```
