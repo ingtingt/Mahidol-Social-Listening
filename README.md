@@ -92,7 +92,7 @@ The database initializes in an empty state. You must run the ingestion script to
 
 Optional reviewed X/Twitter source:
 
-To include reviewed X/Twitter posts alongside the curated Facebook set, mount a local export and set `XQUIK_EXPORT_PATH` before running the same loader. The file can be CSV, JSON, JSONL, or NDJSON from the Xquik API or the OpenClaw package `@xquik/tweetclaw`.
+To include reviewed X/Twitter posts alongside the curated Facebook set, mount a local export and set `XQUIK_EXPORT_PATH` before running the same loader. The file can be CSV, JSON, JSONL, or NDJSON from the Xquik API.
 
 ```bash
 XQUIK_EXPORT_PATH=/app/xquik-posts.json docker exec -it muic_dashboard_web npm run load-data
