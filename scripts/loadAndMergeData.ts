@@ -1,12 +1,44 @@
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import fs from 'fs';
 import path from 'path';
 import Papa from 'papaparse';
+import { readXquikPosts } from './xquikExport';
 
 const prisma = new PrismaClient();
 
 interface CsvRow {
   [key: string]: string;
+}
+
+function isDuplicateError(error: unknown): boolean {
+  return (
+    error instanceof Prisma.PrismaClientKnownRequestError &&
+    error.code === 'P2002'
+  );
+}
+
+async function ingestXquikExport(): Promise<number> {
+  const exportPath = process.env.XQUIK_EXPORT_PATH;
+  if (!exportPath) return 0;
+
+  const posts = readXquikPosts(path.resolve(exportPath));
+  let inserted = 0;
+
+  for (const post of posts) {
+    try {
+      await prisma.post.create({
+        data: {
+          ...post,
+          platform: 'Twitter',
+        },
+      });
+      inserted++;
+    } catch (error: unknown) {
+      if (!isDuplicateError(error)) throw error;
+    }
+  }
+
+  return inserted;
 }
 
 async function main() {
@@ -102,7 +134,11 @@ async function main() {
         },
       });
       insertedCount++;
-    } catch (error) {}
+    } catch (error: unknown) {
+      if (!isDuplicateError(error)) {
+        console.error(`Failed to insert post ${post.post_id}:`, error);
+      }
+    }
   }
   console.log(`✅ Successfully inserted ${insertedCount} posts.`);
 
@@ -147,7 +183,11 @@ async function main() {
             },
           });
           commentCount++;
-        } catch (err: any) {}
+        } catch (error: unknown) {
+          if (!isDuplicateError(error)) {
+            console.error(`Failed to insert comment ${commentId}:`, error);
+          }
+        }
       }
       console.log(
         `✅ Successfully inserted ${commentCount} comments from CSV.`
@@ -157,13 +197,18 @@ async function main() {
     console.error('Error loading Comment CSV:', err);
   }
 
+  const xquikCount = await ingestXquikExport();
+  if (xquikCount > 0) {
+    console.log(`✅ Successfully inserted ${xquikCount} Xquik export posts.`);
+  }
+
   console.log('Data ingestion finished.');
 }
 
 main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
+  .catch((error: unknown) => {
+    console.error(error);
+    process.exitCode = 1;
   })
   .finally(async () => {
     await prisma.$disconnect();
