@@ -1,7 +1,8 @@
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import fs from 'fs';
 import path from 'path';
 import Papa from 'papaparse';
+import { readXquikPosts } from './xquikExport';
 
 const prisma = new PrismaClient();
 
@@ -9,92 +10,31 @@ interface CsvRow {
   [key: string]: string;
 }
 
-type XquikRow = Record<string, unknown>;
-
-function readString(row: XquikRow, keys: string[], fallback: string): string {
-  for (const key of keys) {
-    const value = row[key];
-    if (typeof value === 'string' && value.trim() !== '') return value;
-    if (typeof value === 'number' && Number.isFinite(value)) return String(value);
-  }
-  return fallback;
+function isDuplicateError(error: unknown): boolean {
+  return (
+    error instanceof Prisma.PrismaClientKnownRequestError &&
+    error.code === 'P2002'
+  );
 }
 
-function readNumber(row: XquikRow, keys: string[]): number {
-  for (const key of keys) {
-    const value = row[key];
-    if (typeof value === 'number' && Number.isFinite(value)) return value;
-    if (typeof value === 'string' && value.trim() !== '') {
-      const parsed = Number(value);
-      if (Number.isFinite(parsed)) return parsed;
-    }
-  }
-  return 0;
-}
-
-function rowsFromXquikPayload(payload: unknown): XquikRow[] {
-  if (Array.isArray(payload)) return payload as XquikRow[];
-  if (payload === null || typeof payload !== 'object') return [];
-
-  const record = payload as Record<string, unknown>;
-  for (const key of ['data', 'tweets', 'items', 'results']) {
-    const value = record[key];
-    if (Array.isArray(value)) return value as XquikRow[];
-  }
-
-  return [];
-}
-
-function readXquikRows(filePath: string): XquikRow[] {
-  const content = fs.readFileSync(filePath, 'utf8');
-  if (filePath.endsWith('.csv')) {
-    return Papa.parse<CsvRow>(content, {
-      header: true,
-      skipEmptyLines: true,
-    }).data;
-  }
-
-  if (filePath.endsWith('.jsonl') || filePath.endsWith('.ndjson')) {
-    return content
-      .split(/\r?\n/)
-      .map((line) => line.trim())
-      .filter(Boolean)
-      .map((line) => JSON.parse(line) as XquikRow);
-  }
-
-  return rowsFromXquikPayload(JSON.parse(content));
-}
-
-async function ingestXquikExport() {
+async function ingestXquikExport(): Promise<number> {
   const exportPath = process.env.XQUIK_EXPORT_PATH;
   if (!exportPath) return 0;
 
-  const rows = readXquikRows(path.resolve(exportPath));
+  const posts = readXquikPosts(path.resolve(exportPath));
   let inserted = 0;
 
-  for (const [index, row] of rows.entries()) {
-    const id = readString(row, ['id', 'tweetId', 'tweet_id', 'url'], `xquik-${index}`);
-    const content = readString(row, ['text', 'content', 'fullText', 'body'], '');
-    if (!content) continue;
-
+  for (const post of posts) {
     try {
       await prisma.post.create({
         data: {
-          id,
+          ...post,
           platform: 'Twitter',
-          content,
-          createdAt: new Date(readString(row, ['createdAt', 'created_at', 'timestamp'], new Date().toISOString())),
-          permalink: readString(row, ['url', 'permalink'], `https://x.com/i/web/status/${id}`),
-          reactionsCount: readNumber(row, ['likeCount', 'like_count', 'likes']),
-          sharesCount: readNumber(row, ['retweetCount', 'retweet_count', 'reposts', 'retweets']),
-          commentsCount: readNumber(row, ['replyCount', 'reply_count', 'replies']),
-          sentiment: readString(row, ['sentiment'], 'Neutral'),
-          category: readString(row, ['category'], 'Reviewed X Source'),
         },
       });
       inserted++;
-    } catch (error: any) {
-      if (error.code !== 'P2002') throw error;
+    } catch (error: unknown) {
+      if (!isDuplicateError(error)) throw error;
     }
   }
 
@@ -194,7 +134,11 @@ async function main() {
         },
       });
       insertedCount++;
-    } catch (error) {}
+    } catch (error: unknown) {
+      if (!isDuplicateError(error)) {
+        console.error(`Failed to insert post ${post.post_id}:`, error);
+      }
+    }
   }
   console.log(`✅ Successfully inserted ${insertedCount} posts.`);
 
@@ -239,7 +183,11 @@ async function main() {
             },
           });
           commentCount++;
-        } catch (err: any) {}
+        } catch (error: unknown) {
+          if (!isDuplicateError(error)) {
+            console.error(`Failed to insert comment ${commentId}:`, error);
+          }
+        }
       }
       console.log(
         `✅ Successfully inserted ${commentCount} comments from CSV.`
@@ -258,9 +206,9 @@ async function main() {
 }
 
 main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
+  .catch((error: unknown) => {
+    console.error(error);
+    process.exitCode = 1;
   })
   .finally(async () => {
     await prisma.$disconnect();

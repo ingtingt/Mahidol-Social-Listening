@@ -92,13 +92,16 @@ The database initializes in an empty state. You must run the ingestion script to
 
 Optional reviewed X/Twitter source:
 
-To include reviewed X/Twitter posts alongside the curated Facebook set, mount a local export and set `XQUIK_EXPORT_PATH` before running the same loader. The file can be CSV, JSON, JSONL, or NDJSON from the Xquik API.
+To include reviewed X/Twitter posts alongside the curated Facebook set, copy a local export into the container and set `XQUIK_EXPORT_PATH` for the loader. The file can be CSV, JSON, JSONL, or NDJSON from the Xquik API.
 
 ```bash
-XQUIK_EXPORT_PATH=/app/xquik-posts.json docker exec -it muic_dashboard_web npm run load-data
+docker cp ./xquik-posts.json muic_dashboard_web:/tmp/xquik-posts.json
+docker exec -it -e XQUIK_EXPORT_PATH=/tmp/xquik-posts.json muic_dashboard_web npm run load-data
 ```
 
-Supported row fields include `id`, `tweetId`, `text`, `content`, `url`, `createdAt`, `likeCount`, `retweetCount`, and `replyCount`. Duplicate post IDs are skipped so the loader can be rerun safely.
+Each row must include an `id` or `tweetId`, text content, and a valid creation timestamp. Supported metric fields include `likeCount`, `retweetCount`, and `replyCount`. Duplicate post IDs are skipped so the loader can be rerun safely.
+
+Xquik is an independent third-party service. Not affiliated with X Corp. "Twitter" and "X" are trademarks of X Corp.
 
 ### Step 4: Access the Dashboard
 
